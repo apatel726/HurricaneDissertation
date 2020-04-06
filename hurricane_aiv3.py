@@ -275,7 +275,7 @@ preprocessed_data = shape(hurricanes, timesteps=5)
 processed_data, scaler = fit_feature_scaler(preprocessed_data, hurricanes)
 
 # Save fitted scaler
-with open(r'scalers/hurricane_scaler.pkl', 'wb') as out_file:
+with open('scalers/hurricane_scaler.pkl', 'wb') as out_file:
     pkl.dump(scaler, out_file)
 
 # Create our cross validation data structure
@@ -617,8 +617,7 @@ pd.DataFrame(track_errors['72']).describe()
 pd.DataFrame(track_errors['96']).describe()
 pd.DataFrame(track_errors['120']).describe()
 
-errordb = errors.error_model_container.ErrorModelContainer(
-    "errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
+errordb = ErrorModelContainer("errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
 ai_wind_errors = []
 ai_track_errors = []
 bcd5_wind_errors = []
