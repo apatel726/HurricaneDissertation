@@ -17,12 +17,12 @@ from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.models import Sequential
 
 # Import from hurdat2 class in data folder and models class from hurricane-models folder
-from data.hurricane_data_parser import HurricaneDataParser
-from errors.error_model_container import ErrorModelContainer
+from hurricane_ai.data.hurricane_data_parser import HurricaneDataParser
+from hurricane_ai.errors.error_model_container import ErrorModelContainer
 
 # Initialize Dataframe for hurricanes and error database
-dataset = HurricaneDataParser("data/hurdat2.txt")  # Note that this data includes up to and including 2016
-errors = ErrorModelContainer("errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
+dataset = HurricaneDataParser("hurricane_ai/data/hurdat2.txt")  # Note that this data includes up to and including 2016
+errors = ErrorModelContainer("hurricane_ai/errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
 
 # Show the first 5 records from Hurricane Katrina 2005 (AL122005)
 dataset.hurricanes.query('storm_id == "AL122005"').head()
@@ -431,7 +431,7 @@ long_predictions = [[pred[1] for pred in hurricanes_pred] for hurricanes_pred in
 long_observations = [[obsrv[1] for obsrv in hurricanes_obsrv] for hurricanes_obsrv in y_long_test_scaled]
 ai_errors(long_predictions, long_observations, model_long_history).describe()
 
-test_data = HurricaneDataParser('data/hurdat2-1851-2017-050118.txt')
+test_data = HurricaneDataParser('hurricane_ai/data/hurdat2-1851-2017-050118.txt')
 
 # Parse in hurricanes
 hurricanes_2017 = dict()
