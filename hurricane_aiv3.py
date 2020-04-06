@@ -1,41 +1,58 @@
 # Import various libraries throughout the software
-from pprint import pprint
-import numpy as np
 import datetime
-import dateutil
-import pandas as pd
+import math
+import pickle as pkl
+from pprint import pprint
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
+from sklearn import model_selection
 from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.layers import Bidirectional
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import TimeDistributed
+from tensorflow.keras.models import Sequential
 
 # Import from hurdat2 class in data folder and models class from hurricane-models folder
-from data.hurdat2 import hurdat2
-from errors.models import models
+from data.hurricane_data_parser import HurricaneDataParser
+from errors.error_model_container import ErrorModelContainer
 
 # Initialize Dataframe for hurricanes and error database
-dataset = hurdat2("data/hurdat2.txt")  # Note that this data includes up to and including 2016
-errors = models("errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
+dataset = HurricaneDataParser("data/hurdat2.txt")  # Note that this data includes up to and including 2016
+errors = ErrorModelContainer("errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
 
 # Show the first 5 records from Hurricane Katrina 2005 (AL122005)
 dataset.hurricanes.query('storm_id == "AL122005"').head()
 
 # Show the first 3 OFCL hurricane model errors for Hurricane Katrina 2005 on 28-08-2005/18:00:00
-pprint(errors.models['OFCL'].storm['AL122005'][datetime.datetime(2005, 8, 28, 18, 0)], indent=8)
+pprint(errors.error_models['OFCL'].storm['AL122005'][datetime.datetime(2005, 8, 28, 18, 0)], indent=8)
 
 
 # Create hurricane class
-class hurricane(object):
-    def __init__(self, name, id):
+class Hurricane(object):
+    def __init__(self, hurricane_name, hurricane_id):
+        """
+        Initialize Hurricane object
+        :param hurricane_name: Human-readable hurricane name
+        :param hurricane_id: Unique hurricane identifier
+        """
+
         # Set instance variables
-        self.name = name
-        self.id = id
+        self.name = hurricane_name
+        self.id = hurricane_id
         self.entries = dict()
         self.models = dict()
 
-        return
-
-    # Add hurricane track entry based on standard HURDAT2 format
     def add_entry(self, array):
-        entry = {
+        """
+        Adds a hurricane track entry based on standard HURDAT2 format
+        :param array: Hurricane track entry to add
+        """
+
+        self.entries.update({
             array[0]: {  # dateteime of entry
                 'entry_time': array[0],
                 'entry_id': array[1],
@@ -46,16 +63,16 @@ class hurricane(object):
                 'min_pressure': None if array[6] is None else float(array[6]),  # Early records are -999 or None
                 'wind_radii': array[7:],  # Array based on HURDAT2 format
             }
-        }
-        self.entries.update(entry)
+        })
 
-        return
-
-    # Add hurricane model errors
     def add_model(self, name, model):
-        self.models[name] = model
+        """
+        Adds hurricane model errors
+        :param name: Human-readable hurricane name
+        :param model: The hurricane model
+        """
 
-        return
+        self.models[name] = model
 
 
 # Storm ID Key for matching between datasets
@@ -68,38 +85,41 @@ for index, entry in dataset.hurricanes.iterrows():
     print("Transforming {}/{} entries from HURDAT2".format(index + 1, len(dataset.hurricanes)), end="\r")
     # New hurricane
     if entry['storm_id'] not in hurricanes:
-        hurricanes[entry['storm_id']] = hurricane(entry['storm_name'], entry['storm_id'])
+        hurricanes[entry['storm_id']] = Hurricane(entry['storm_name'], entry['storm_id'])
         storm_ids[entry['storm_id']] = entry['storm_name']
     # Add entry to hurricane
     hurricanes[entry['storm_id']].add_entry(entry[2:])
 print("\nDone!")
 
 # Get all available model errors
-models = errors.models.keys()
+models = errors.error_models.keys()
 # Load model errors into hurricanes
 for id in storm_ids:
     for model in models:
         # Skip if this hurricane does not have the model
-        if id not in errors.models[model].storm:
+        if id not in errors.error_models[model].storm:
             continue
-        hurricanes[id].add_model(model, errors.models[model].storm[id])
+        hurricanes[id].add_model(model, errors.error_models[model].storm[id])
 
 
 def feature_extraction(timestep, previous):
-    '''
-#    PURPOSE: Calculate the features for a machine learning model within the context of hurricane-net
+    """
+    PURPOSE: Calculate the features for a machine learning model within the context of hurricane-net
     METHOD: Use the predictors and the calculation methodology defined in Knaff 2013
-    INPUT:  timestep - current dictionary of features in the hurricane object format
-            previous - previous timestep dictionary of features in the hurricane object format
-    OUTPUT: Dictionary of features
 
+    Timestep format:
     timestep = {
       'lat' : float,
       'long' : float,
       'max-wind' : float,
       'entry-time' : datetime
     }
-    '''
+
+    :param timestep: Current dictionary of features in the hurricane object format
+    :param previous: Previous timestep dictionary of features in the hurricane object format
+    :return: Dictionary of features
+    """
+
     features = {
         'lat': timestep['lat'],
         'long': timestep['long'],
@@ -116,19 +136,21 @@ def feature_extraction(timestep, previous):
         'day': timestep['entry_time'].day,
         'hour': timestep['entry_time'].hour,
     }
+
     return features
 
 
 def storm_x_y(storm, timesteps=1, lag=24):
-    '''
+    """
     PURPOSE: Create independent and dependent samples for a machine learning model based on the timesteps
     METHOD: Use the HURDAT2 database and a hurricane object as defined in hurricane-net for feature extraction
-    INPUT:  storm - hurricane object
-            timesteps - (default = 1) number of timesteps to calculate
-            include_none - (default = False) Boolean for including None in test data. Imputing function unavailable.
-            lag - (default = 24) lag in hours for the dependent variables up to 5 days
-    OUTPUT: Dictionary with independent (x) and dependent (y) values.
-    '''
+
+    :param storm: Hurricane object
+    :param timesteps: Number of timesteps to calculate (default = 1)
+    :param lag: Lag in hours for the dependent variables up to 5 days (default = 24)
+    :return: Dictionary with independent (x) and dependent (y) values.
+    """
+
     x = []
     # Create testing data structure with a dictionary
     times = [time * lag for time in
@@ -173,14 +195,16 @@ def storm_x_y(storm, timesteps=1, lag=24):
 
 
 def shape(hurricanes, timesteps, remove_missing=True):
-    '''
+    """
     PURPOSE: Shape our data for input into machine learning models
     METHOD: Use a numpy array to shape into (samples, timesteps, features)
-    INPUT:  hurricanes - dictionary of hurricane objects
-            timesteps - number of timesteps for the shape
-            remove_missing - boolean indicating whether the algorithm will disregard missing values
-    OUTPUT: numpy array of shape (samples, timesteps, 11) where 11 is the number of predictors in a hurricane object
-    '''
+
+    :param hurricanes: Dictionary of hurricane objects
+    :param timesteps: Number of timesteps for the shape
+    :param remove_missing: Boolean indicating whether the algorithm will disregard missing values
+    :return: Numpy array of shape (samples, timesteps, 11) where 11 is the number of predictors in a hurricane object
+    """
+
     x = []
     y = []
     lag = 24  # lag time in hours
@@ -214,44 +238,45 @@ def shape(hurricanes, timesteps, remove_missing=True):
     return {'x': np.array(x), 'y': np.array(y)}
 
 
-def scaler(processed_data, hurricanes):
-    '''
+def fit_feature_scaler(processed_data, hurricanes):
+    """
     PURPOSE: Scale our data using the RobustScaler method from the sklearn library
     METHOD: Generate data using 1 timesteps and then remove the NaN or None types to use the scaler methods
-    INPUT:  hurricanes - dictionary of hurricane objects
-            processed_data - dictionary of x and y values of data produced by shape() function with no missing values
-    OUTPUT: 1) Scaled processed_data using RobustScaler
-            2) RobustScaler object fit with appropriate data
-    '''
+
+    :param processed_data: Dictionary of x and y values of data produced by shape() function with no missing values
+    :param hurricanes: Dictionary of hurricane objects
+    :return: 1) Scaled processed_data using RobustScaler
+             2) RobustScaler object fit with appropriate data
+    """
+
     print("Scaling Data . . . (1 timestep for unqiue data)")
-    # Create our scaler
-    unqiue_data = shape(hurricanes, timesteps=1)
-    x = np.reshape(unqiue_data['x'], (unqiue_data['x'].shape[0], -1))
+
+    # Create scaler
+    unique_data = shape(hurricanes, timesteps=1)
+    x = np.reshape(unique_data['x'], (unique_data['x'].shape[0], -1))
     x = np.delete(x, np.where(np.isnan(x))[0], 0)
-    scaler = RobustScaler()
-    scaler.fit(x)
+    feature_scaler = RobustScaler()
+    feature_scaler.fit(x)
 
     # Scale our data
     for index in range(len(processed_data['x'])):
         # Scale our x
-        processed_data['x'][index] = scaler.transform(processed_data['x'][index])
+        processed_data['x'][index] = feature_scaler.transform(processed_data['x'][index])
         # Scale our y
-        processed_data['y'][index] = scaler.transform(processed_data['y'][index])
+        processed_data['y'][index] = feature_scaler.transform(processed_data['y'][index])
+
     print("Done scaling.")
-    return processed_data, scaler
+
+    return processed_data, feature_scaler
 
 
 # Finalize and scale procesed data into a dictionary
 preprocessed_data = shape(hurricanes, timesteps=5)
-processed_data, scaler = scaler(preprocessed_data, hurricanes)
+processed_data, scaler = fit_feature_scaler(preprocessed_data, hurricanes)
 
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import TimeDistributed
-from keras.layers import Bidirectional
-from keras.layers import RepeatVector
-from sklearn import model_selection
+# Save fitted scaler
+with open(r'scalers/hurricane_scaler.pkl', 'wb') as out_file:
+    pkl.dump(scaler, out_file)
 
 # Create our cross validation data structure
 X_train, X_test, y_train, y_test = model_selection.train_test_split(processed_data['x'], processed_data['y'],
@@ -269,24 +294,51 @@ y_test_long = np.array([[[features[1]] for features in y] for y in y_test], dtyp
 
 
 def bd_lstm_td(X_train, y_train, X_test, y_test, n_epochs=500):
+    """
+    Instantiates and trains a bidirectional LSTM model.
+
+    :param X_train: Training set observations
+    :param y_train: Training set labels
+    :param X_test: Test set observations
+    :param y_test: Test set labels
+    :param n_epochs: Number of epochs to train
+    :return: The trained model
+    """
+
     model = Sequential()
     model.add(Bidirectional(LSTM(units=512, return_sequences=True, dropout=0.05),
                             input_shape=(X_train.shape[1], X_train.shape[2])))
     model.add(LSTM(units=256, return_sequences=True, dropout=0.05))
     model.add(TimeDistributed(Dense(1)))
     model.compile(loss='mse', optimizer='adadelta')
+
     print(model.summary())
+
     history = model.fit(X_train, y_train, batch_size=len(X_train), epochs=n_epochs,
                         validation_data=(X_test, y_test))
+
     return model, history
 
 
 def lstm_td(X_train, X_test, y_train, y_test):
+    """
+    Instantiates and trains an LSTM model.
+
+    :param X_train: Training set observations
+    :param y_train: Training set labels
+    :param X_test: Test set observations
+    :param y_test: Test set labels
+    :param n_epochs: Number of epochs to train
+    :return: The trained model
+    """
+
     model = Sequential()
     model.add(LSTM(units=1024, input_shape=(5, 8), return_sequences=True))
     model.add(TimeDistributed(Dense(8)))
     model.compile(loss='mean_squared_error', optimizer='adam')
+
     print(model.summary())
+
     model.fit(X_train, y_train, batch_size=len(X_train), epochs=300)
 
     return model
@@ -296,16 +348,22 @@ model_wind, model_wind_history = bd_lstm_td(X_train, y_train_wind, X_test, y_tes
 model_lat, model_lat_history = bd_lstm_td(X_train, y_train_lat, X_test, y_test_lat, n_epochs=1000)
 model_long, model_long_history = bd_lstm_td(X_train, y_train_long, X_test, y_test_long, n_epochs=1000)
 
+# Save models
+model_wind.save('models/huraim_wind.h5')
+model_lat.save('models/huraim_lat.h5')
+model_long.save('models/huraim_long.h5')
 
 def ai_errors(predictions, observations, history=None):
-    '''
+    """
     PURPOSE: Provide descriptive statistics on the predicted output versus the observed measurments
     METHOD:  Take the errors of the predictions and answers and then calculate standard descriptive statistics
-    INPUT:   predictions - 2D array of predictions of observed output
-             observations - 2D array measurements of observed output
-             history - Keras history model for displaying model loss, default is None if not available
-    OUTPUT:
-    '''
+
+    :param predictions: 2D array of predictions of observed output
+    :param observations: 2D array measurements of observed output
+    :param history: Keras history model for displaying model loss, default is None if not available
+    :return: Data frame of model prediction errors
+    """
+
     errors = []
     for i in range(len(predictions)):
         for j in range(len(predictions[i])):
@@ -373,7 +431,7 @@ long_predictions = [[pred[1] for pred in hurricanes_pred] for hurricanes_pred in
 long_observations = [[obsrv[1] for obsrv in hurricanes_obsrv] for hurricanes_obsrv in y_long_test_scaled]
 ai_errors(long_predictions, long_observations, model_long_history).describe()
 
-test_data = hurdat2('data/hurdat2-1851-2017-050118.txt')
+test_data = HurricaneDataParser('data/hurdat2-1851-2017-050118.txt')
 
 # Parse in hurricanes
 hurricanes_2017 = dict()
@@ -384,7 +442,7 @@ for index, entry in test_data.hurricanes.iterrows():
     if entry['storm_id'][-4:] != '2017':
         continue
     if entry['storm_id'] not in hurricanes_2017:
-        hurricanes_2017[entry['storm_id']] = hurricane(entry['storm_name'], entry['storm_id'])
+        hurricanes_2017[entry['storm_id']] = Hurricane(entry['storm_name'], entry['storm_id'])
         storm_ids[entry['storm_id']] = entry['storm_name']
     # Add entry to hurricane
     hurricanes_2017[entry['storm_id']].add_entry(entry[2:])
@@ -432,11 +490,16 @@ tracks['wind_predictions_raw'] = model_wind.predict(tracks['inputs'])
 tracks['lat_predictions_raw'] = model_lat.predict(tracks['inputs'])
 tracks['long_predictions_raw'] = model_long.predict(tracks['inputs'])
 
-# Define a function to return the distance between two coordinates in nautical miles
-import math
-
 
 def distance(origin, destination):
+    """
+    Returns the distance between two coordinates in nautical miles.
+
+    :param origin: The origin point
+    :param destination: The destination point
+    :return: The distance between the two points in nautical miles
+    """
+
     lat1, lon1 = origin
     lat2, lon2 = destination
     radius = 6371  # km
@@ -554,9 +617,8 @@ pd.DataFrame(track_errors['72']).describe()
 pd.DataFrame(track_errors['96']).describe()
 pd.DataFrame(track_errors['120']).describe()
 
-import errors
-
-errordb = errors.models.models("errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
+errordb = errors.error_model_container.ErrorModelContainer(
+    "errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
 ai_wind_errors = []
 ai_track_errors = []
 bcd5_wind_errors = []
@@ -568,16 +630,17 @@ for index, prediction in enumerate(tracks['wind_predictions']):
     valid_time = prediction[0]['valid_time']
     storm_id = prediction[0]['storm_id']
     # Check to see if we have error for this storm and at the valid time
-    if storm_id in errordb.models['BCD5'].storm and valid_time in errordb.models['BCD5'].storm[storm_id]:
+    if storm_id in errordb.error_models['BCD5'].storm and valid_time in errordb.error_models['BCD5'].storm[storm_id]:
         print("Found {} at {}".format(storm_id, valid_time))
         # If we find it, compare
         for i, forecast in enumerate(prediction):
             # See if we can find another prediction like that in the error database
-            if errordb.models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
+            if errordb.error_models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
                 forecast['forecast_time'].to_pydatetime()]:
                 print("\tIntensity Truth: {}, AI forecast: {}, BCD5 forecast: {}".format(forecast['truth'],
                                                                                          forecast['ai-wind'],
-                                                                                         errordb.models['BCD5'].storm[
+                                                                                         errordb.error_models[
+                                                                                             'BCD5'].storm[
                                                                                              storm_id][valid_time][
                                                                                              'track_forecast'][forecast[
                                                                                              'forecast_time'].to_pydatetime()]))
@@ -588,19 +651,20 @@ for index, prediction in enumerate(tracks['wind_predictions']):
                     tracks['long_predictions'][index][i]['ai-long'],
                     distance(
                         (tracks['lat_predictions'][index][i]['truth'], tracks['long_predictions'][index][i]['truth']), (
-                        tracks['lat_predictions'][index][i]['ai-lat'],
-                        tracks['long_predictions'][index][i]['ai-long'])),
-                    errordb.models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
+                            tracks['lat_predictions'][index][i]['ai-lat'],
+                            tracks['long_predictions'][index][i]['ai-long'])),
+                    errordb.error_models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
                         forecast['forecast_time'].to_pydatetime()]
-                    ))
+                ))
                 ai_wind_errors.append(abs(forecast['truth'] - forecast['ai-wind']))
                 ai_track_errors.append(abs(distance(
                     (tracks['lat_predictions'][index][i]['truth'], tracks['long_predictions'][index][i]['truth']),
                     (tracks['lat_predictions'][index][i]['ai-lat'], tracks['long_predictions'][index][i]['ai-long']))))
-                bcd5_wind_errors.append(abs(errordb.models['BCD5'].storm[storm_id][valid_time]['track_forecast'][
+                bcd5_wind_errors.append(abs(errordb.error_models['BCD5'].storm[storm_id][valid_time]['track_forecast'][
                                                 forecast['forecast_time'].to_pydatetime()]))
-                bcd5_track_errors.append(abs(errordb.models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
-                                                 forecast['forecast_time'].to_pydatetime()]))
+                bcd5_track_errors.append(
+                    abs(errordb.error_models['BCD5'].storm[storm_id][valid_time]['intensity_forecast'][
+                            forecast['forecast_time'].to_pydatetime()]))
 
 pd.DataFrame(ai_wind_errors).describe()
 pd.DataFrame(bcd5_wind_errors).describe()
@@ -655,14 +719,14 @@ def hurricane_ai(input):
             extract.append(list(feature_extraction(input[value], temp).values()))
             temp = input[value]
 
-    state = np.expand_dims(scaler.transform(extract), axis=0)
+    state = np.expand_dims(fit_feature_scaler.transform(extract), axis=0)
     print('extract: {}, state: {}'.format(extract, state))
     # Finally, use our hurricane ai to predict storm state
-    lat = [output[0] for output in scaler.inverse_transform(
+    lat = [output[0] for output in fit_feature_scaler.inverse_transform(
         [[lat[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] for lat in model_lat.predict(state)[0]])]
-    long = [output[1] for output in scaler.inverse_transform(
+    long = [output[1] for output in fit_feature_scaler.inverse_transform(
         [[0, long[0], 0, 0, 0, 0, 0, 0, 0, 0, 0] for long in model_long.predict(state)[0]])]
-    wind = [output[2] for output in scaler.inverse_transform(
+    wind = [output[2] for output in fit_feature_scaler.inverse_transform(
         [[0, 0, wind[0], 0, 0, 0, 0, 0, 0, 0, 0] for wind in model_wind.predict(state)[0]])]
 
     output = dict()
@@ -675,8 +739,6 @@ def hurricane_ai(input):
 
     return output
 
-
-from dateutil.parser import parse
 
 input = {
     0: {
