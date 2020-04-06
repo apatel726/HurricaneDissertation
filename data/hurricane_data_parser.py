@@ -1,14 +1,14 @@
 # Akash Patel
 # Last Update: 3/25/30
 # Read the text file from NOAA to convert into pandas DataFrame
-# formate from http://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atlantic.pdf
+# format from http://www.nhc.noaa.gov/data/hurdat/hurdat2-format-atlantic.pdf
 
 import csv
 import datetime
 import pandas as pd
 
 
-class hurdat2:
+class HurricaneDataParser:
     # Constants for validation when parsing
     STORM_HEADER_ROW_LENGTH = 3
     STORM_ENTRY_ROW_LENGTH = 20
@@ -19,10 +19,10 @@ class hurdat2:
         Initializes the hurricane data API
         :param filename:
         """
-        self.hurricanes = self.parse(filename)
+        self.hurricanes = self._parse(filename)
         return
 
-    def parse(self, filename="hurdat2.txt"):
+    def _parse(self, filename="hurdat2.txt"):
         """
         Parses hurricane data and stores in class member data frame.
         :param filename: Default filename.
