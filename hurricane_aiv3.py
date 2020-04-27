@@ -16,13 +16,13 @@ from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.models import Sequential
 
-# Import from hurdat2 class in data folder and models class from hurricane-models folder
-from hurricane_ai.data.hurricane_data_parser import HurricaneDataParser
-from hurricane_ai.errors.error_model_container import ErrorModelContainer
+# Import from hurdat2 class in container folder and models class from hurricane-models folder
+from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
+from hurricane_ai.container.error_model_container import ErrorModelContainer
 
 # Initialize Dataframe for hurricanes and error database
-dataset = HurricaneDataParser("hurricane_ai/data/hurdat2.txt")  # Note that this data includes up to and including 2016
-errors = ErrorModelContainer("hurricane_ai/errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
+dataset = HurricaneDataContainer("hurricane_ai/data/source/hurdat2.txt")  # Note that this container includes up to and including 2016
+errors = ErrorModelContainer("hurricane_ai/data/source/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt")
 
 # Show the first 5 records from Hurricane Katrina 2005 (AL122005)
 dataset.hurricanes.query('storm_id == "AL122005"').head()
@@ -152,7 +152,7 @@ def storm_x_y(storm, timesteps=1, lag=24):
     """
 
     x = []
-    # Create testing data structure with a dictionary
+    # Create testing container structure with a dictionary
     times = [time * lag for time in
              range(1, (120 // lag) + 1)]  # Begin at lag hours with lag increments up to 120h inclusive
     y = dict([(time, []) for time in times])
@@ -196,7 +196,7 @@ def storm_x_y(storm, timesteps=1, lag=24):
 
 def shape(hurricanes, timesteps, remove_missing=True):
     """
-    PURPOSE: Shape our data for input into machine learning models
+    PURPOSE: Shape our container for input into machine learning models
     METHOD: Use a numpy array to shape into (samples, timesteps, features)
 
     :param hurricanes: Dictionary of hurricane objects
@@ -208,7 +208,7 @@ def shape(hurricanes, timesteps, remove_missing=True):
     x = []
     y = []
     lag = 24  # lag time in hours
-    precision = np.float64  # defines the precision of our data type
+    precision = np.float64  # defines the precision of our container type
     times = [time * lag for time in
              range(1, (120 // lag) + 1)]  # Begin at lag hours with lag increments up to 120h inclusive
     count = 0
@@ -240,16 +240,16 @@ def shape(hurricanes, timesteps, remove_missing=True):
 
 def fit_feature_scaler(processed_data, hurricanes):
     """
-    PURPOSE: Scale our data using the RobustScaler method from the sklearn library
-    METHOD: Generate data using 1 timesteps and then remove the NaN or None types to use the scaler methods
+    PURPOSE: Scale our container using the RobustScaler method from the sklearn library
+    METHOD: Generate container using 1 timesteps and then remove the NaN or None types to use the scaler methods
 
-    :param processed_data: Dictionary of x and y values of data produced by shape() function with no missing values
+    :param processed_data: Dictionary of x and y values of container produced by shape() function with no missing values
     :param hurricanes: Dictionary of hurricane objects
     :return: 1) Scaled processed_data using RobustScaler
-             2) RobustScaler object fit with appropriate data
+             2) RobustScaler object fit with appropriate container
     """
 
-    print("Scaling Data . . . (1 timestep for unqiue data)")
+    print("Scaling Data . . . (1 timestep for unqiue container)")
 
     # Create scaler
     unique_data = shape(hurricanes, timesteps=1)
@@ -258,7 +258,7 @@ def fit_feature_scaler(processed_data, hurricanes):
     feature_scaler = RobustScaler()
     feature_scaler.fit(x)
 
-    # Scale our data
+    # Scale our container
     for index in range(len(processed_data['x'])):
         # Scale our x
         processed_data['x'][index] = feature_scaler.transform(processed_data['x'][index])
@@ -270,7 +270,7 @@ def fit_feature_scaler(processed_data, hurricanes):
     return processed_data, feature_scaler
 
 
-# Finalize and scale procesed data into a dictionary
+# Finalize and scale procesed container into a dictionary
 preprocessed_data = shape(hurricanes, timesteps=5)
 processed_data, scaler = fit_feature_scaler(preprocessed_data, hurricanes)
 
@@ -278,7 +278,7 @@ processed_data, scaler = fit_feature_scaler(preprocessed_data, hurricanes)
 with open(r'scalers/hurricane_scaler.pkl', 'wb') as out_file:
     pkl.dump(scaler, out_file)
 
-# Create our cross validation data structure
+# Create our cross validation container structure
 X_train, X_test, y_train, y_test = model_selection.train_test_split(processed_data['x'], processed_data['y'],
                                                                     test_size=0.2)
 
@@ -431,14 +431,14 @@ long_predictions = [[pred[1] for pred in hurricanes_pred] for hurricanes_pred in
 long_observations = [[obsrv[1] for obsrv in hurricanes_obsrv] for hurricanes_obsrv in y_long_test_scaled]
 ai_errors(long_predictions, long_observations, model_long_history).describe()
 
-test_data = HurricaneDataParser('hurricane_ai/data/hurdat2-1851-2017-050118.txt')
+test_data = HurricaneDataContainer('hurricane_ai/data/source/hurdat2-1851-2017-050118.txt')
 
 # Parse in hurricanes
 hurricanes_2017 = dict()
 print("Transforming 2017 HURDAT2 into objects . . .")
 for index, entry in test_data.hurricanes.iterrows():
     print("Transforming {}/{} entries from HURDAT2".format(index + 1, len(dataset.hurricanes)), end="\r")
-    # Filter to capture 2017 data
+    # Filter to capture 2017 container
     if entry['storm_id'][-4:] != '2017':
         continue
     if entry['storm_id'] not in hurricanes_2017:
@@ -458,8 +458,8 @@ tracks = {
     'valid_times': [],  # The valid time to compare to the error database
 }
 for index, storm in enumerate(storms_filter):
-    # Create inputs to ai. ai requires scaled data as input
-    entries = [entry[1] for entry in sorted(storm.entries.items())]  # Extracts data from data structure
+    # Create inputs to ai. ai requires scaled container as input
+    entries = [entry[1] for entry in sorted(storm.entries.items())]  # Extracts container from container structure
 
     # Scale the entries
     for start_index in range(1, len(entries) - 5):  # Go through each entry
@@ -541,9 +541,9 @@ for index, prediction in enumerate(tracks['wind_predictions_raw']):
     long_scaled = [scaler.inverse_transform([[0, longs[0], 0, 0, 0, 0, 0, 0, 0, 0, 0] for longs in
                                              tracks['long_predictions_raw'][index]])]  # Index 1 is long
 
-    # Extract the wind prediction from data structure and store into new data structure
+    # Extract the wind prediction from container structure and store into new container structure
     for i in range(len(winds_scaled)):
-        # The new data structure is a tuple of (wind, storm_id, valid_time, forecast_time)
+        # The new container structure is a tuple of (wind, storm_id, valid_time, forecast_time)
         wind_predictions = []
         lat_predictions = []
         long_predictions = []
@@ -708,7 +708,7 @@ def hurricane_ai(input):
       'max-winds' : float
     }
     '''
-    # Take entries and transform them into our data model
+    # Take entries and transform them into our container model
     extract = []
     temp = None
     for index, value in enumerate([-120, -96, -72, -48, -24, 0]):

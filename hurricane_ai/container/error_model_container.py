@@ -5,11 +5,12 @@
 # create an API for common functions and applications
 # OUTPUT: Forecast Error Database http://www.nhc.noaa.gov/verification/verify7.shtml
 
-import pandas as pd
-import numpy as np
 import datetime
+import pickle as pkl
 from datetime import timedelta
-import io
+from os import path
+
+from hurricane_ai import ERROR_SOURCE_FILE, ERROR_PKL_FILE, is_source_modified
 
 
 class ErrorModel:
@@ -18,38 +19,79 @@ class ErrorModel:
     METHOD: Provide an API
     OUTPUT: A class with a DataFrame and associated operations
     """
-    name = None
-    # Dictionary key: STMID
-    storm = dict()
 
-    def __init__(self, model_name):
+    def __init__(self, model_name: str):
+        """
+        Sets model name and instantiates new storm data dictionary for the given NHC model name.
+        :param model_name: The name of the NHC model.
+        """
         self.name = model_name
+        self.storms = dict()
         return
+
+    def add_entry(self, storm_id, timestamp, **kwargs):
+        """
+        Adds a new measurement for a given storm at a given time.
+        :param storm_id: The ID of the storm to which the measurement corresponds.
+        :param timestamp: The time at which the measurement was taken.
+        :param kwargs: Measurement data.
+        """
+
+        # Add new entry for the given storm ID if it doesn't already exist
+        if storm_id not in self.storms.keys():
+            self.storms[storm_id] = dict()
+
+        # Add observation for the given storm
+        self.storms[storm_id].update({
+            timestamp: {
+                "sample_sizes": kwargs['sample_sizes'],
+                "lat": kwargs['lat'],
+                "lon": kwargs['lon'],
+                "wind_speed": kwargs['wind_speed'],
+                "intensity_forecast": kwargs['int_fcst'],
+                "track_forecast": kwargs['trk_fcst'],
+            }
+        })
 
 
 class ErrorModelContainer:
-    error_models = dict()
+    """
+    Encapsulates storm error model measurements.
+    """
 
-    def __init__(self, filename="1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt"):
+    def __init__(self):
         """
-        PURPOSE: Initialize the Forecast Error Database
-        METHOD: Read in the text file with the NHC model errors
-        OUTPUT: Success / Failure dialogue
-        :param filename: Official forecast errors
+        Reads in the text file with NHC model errors.
+        :param source_file: Official forecast errors
+        :param pkl_file: Pickle file containing post-processed forecast error objects
         """
-        self._parse(filename)
-        return
 
-    def _parse(self, filename="1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt"):
+        # Read in the previously-serialized error data if it exists and the source data hasn't been modified
+        if path.exists(ERROR_PKL_FILE) and not is_source_modified(ERROR_SOURCE_FILE, ERROR_PKL_FILE):
+            with open(ERROR_PKL_FILE, 'rb') as in_file:
+                self.error_models = pkl.load(in_file)
+            return
+
+        # Parse file and construct dictionary of error model object
+        self.error_models = self._parse_from_raw(ERROR_SOURCE_FILE)
+
+        # Serialize error models to file
+        with open(ERROR_PKL_FILE, 'wb') as out_file:
+            pkl.dump(self.error_models, out_file)
+
+    @staticmethod
+    def _parse_from_raw(filename: str) -> dict:
         """
         PURPOSE: Parse in the Forecast Error database
         METHOD: Use the forecast error file format provided by the NHC and NOAA and load into model dictionary
-        OUTPUT: pandas DataFrame with appropriate data
+        OUTPUT: pandas DataFrame with appropriate container
         REFERENCES:
         [1] http://www.nhc.noaa.gov/verification/errors/1970-present_OFCL_v_BCD5_ind_ATL_TI_errors_noTDs.txt
         [2] http://www.nhc.noaa.gov/verification/pdfs/Error_Tabulation_File_Format.pdf
         :param filename: Official forecast errors
         """
+
+        error_models = dict()
 
         # Begin parsing by reading in line by line
         with open(filename) as raw:
@@ -59,7 +101,7 @@ class ErrorModelContainer:
             line = lines[1].split()
             model_names = line[2:]
             for model_name in model_names:
-                self.error_models[model_name] = ErrorModel(model_name)
+                error_models[model_name] = ErrorModel(model_name)
 
             # Data starts at line 9
             for line in lines[9:]:
@@ -93,15 +135,8 @@ class ErrorModelContainer:
                         [None if x == "-9999.0" else float(x) for x in line[24 + (20 * i): 34 + (20 * i)]])))
 
                     # Add forecast to model and storm, initialize if storm id does not exist
-                    if storm_id not in self.error_models[model_names[i]].storm.keys():
-                        self.error_models[model_names[i]].storm[storm_id] = dict()
-                    self.error_models[model_names[i]].storm[storm_id].update({
-                        timestamp: {
-                            "sample_sizes": sample_sizes,
-                            "lat": latitude,
-                            "long": longitude,
-                            "wind_speed": wind_speed,
-                            "intensity_forecast": intensity_forecast,
-                            "track_forecast": track_forecast,
-                        }
-                    })
+                    error_models[model_names[i]].add_entry(storm_id, timestamp, sample_sizes=sample_sizes, lat=latitude,
+                                                           lon=longitude, wind_speed=wind_speed,
+                                                           int_fcst=intensity_forecast, trk_fcst=track_forecast)
+
+        return error_models
