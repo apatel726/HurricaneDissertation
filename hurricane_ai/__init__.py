@@ -12,14 +12,13 @@ HURRICANE_PKL_FILE = os.path.join(PROJ_BASE_DIR, 'data/processed/hurricane_data.
 HURRICANE_IDS_FILE = os.path.join(PROJ_BASE_DIR, 'data/processed/hurricane_ids.txt')
 ERROR_PKL_FILE = os.path.join(PROJ_BASE_DIR, 'data/processed/error_data.pkl')
 TRAIN_TEST_NPZ_FILE = os.path.join(PROJ_BASE_DIR, 'data/processed/train_test_data.npz')
-SCALED_TRAIN_TEST_NPZ_FILE = os.path.join(PROJ_BASE_DIR, 'data/processed/scaled_train_test_data.npz')
-SCALER_FILE = os.path.join(PROJ_BASE_DIR, 'scaler/feature_scaler.pkl')
+SCALER_FILE = os.path.join(PROJ_BASE_DIR, 'scaler/feature_scaler.pkl_bak')
 
 # ML model constants
-BD_LSTM_TD_MODEL = os.path.join(PROJ_BASE_DIR, 'models/bd_lstm_td.h5')
-BD_LSTM_TD_MODEL_HIST = os.path.join(PROJ_BASE_DIR, 'models/bd_lstm_td_hist.csv')
-LSTM_TD_MODEL = os.path.join(PROJ_BASE_DIR, 'models/lstm_td.h5')
-LSTM_TD_MODEL_HIST = os.path.join(PROJ_BASE_DIR, 'models/lstm_td_hist.csv')
+BD_LSTM_TD_MODEL = os.path.join(PROJ_BASE_DIR, 'models/bd_lstm_td_{}.h5')
+BD_LSTM_TD_MODEL_HIST = os.path.join(PROJ_BASE_DIR, 'models/bd_lstm_td_{}_hist.csv')
+LSTM_TD_MODEL = os.path.join(PROJ_BASE_DIR, 'models/lstm_td_{}.h5')
+LSTM_TD_MODEL_HIST = os.path.join(PROJ_BASE_DIR, 'models/lstm_td_{}_hist.csv')
 
 
 def is_source_modified(source_file, processed_file):
