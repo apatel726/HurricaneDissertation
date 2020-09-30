@@ -7,6 +7,7 @@ import csv
 import datetime
 import pickle as pkl
 from os import path
+import os
 
 import pandas as pd
 
@@ -75,7 +76,7 @@ class HurricaneDataContainer:
         # Read in the previously-serialized hurricane data if it exists and the source data hasn't been modified
         if path.exists(HURRICANE_PKL_FILE) and not is_source_modified(HURRICANE_SOURCE_FILE,
                                                                       HURRICANE_PKL_FILE) and path.exists(
-                HURRICANE_IDS_FILE):
+            HURRICANE_IDS_FILE):
 
             self.storm_ids = []
 
@@ -95,6 +96,7 @@ class HurricaneDataContainer:
         self.storm_ids, self.hurricanes = self._get_hurricanes_ids(self._parse(HURRICANE_SOURCE_FILE))
 
         # Serialize hurricane measurements to file
+        os.makedirs(os.path.dirname(HURRICANE_PKL_FILE), exist_ok=True)
         with open(HURRICANE_PKL_FILE, 'wb') as out_file:
             pkl.dump(self.hurricanes, out_file)
 

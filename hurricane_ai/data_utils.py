@@ -1,13 +1,13 @@
 import datetime
-from os import path
+import os
 import pickle as pkl
+from os import path
 
 import numpy as np
-
 from sklearn.preprocessing import RobustScaler
 
-from hurricane_ai import TRAIN_TEST_NPZ_FILE, is_source_modified, HURRICANE_SOURCE_FILE, SCALED_TRAIN_TEST_NPZ_FILE, \
-    SCALER_FILE
+from hurricane_ai import is_source_modified, HURRICANE_SOURCE_FILE, TRAIN_TEST_NPZ_FILE, SCALER_FILE
+from hurricane_ai.container.hurricane_data_container import Hurricane
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 
 
@@ -22,7 +22,7 @@ def subset_features(data, feature_idx: int) -> np.array:
     return np.array([[[features[feature_idx]] for features in y] for y in data], dtype=np.float64)
 
 
-def build_scaled_ml_dataset(timesteps=1, remove_missing=True, train_test_data: dict = None) -> (dict, RobustScaler):
+def build_scaled_ml_dataset(timesteps=5, remove_missing=True, train_test_data: dict = None) -> (dict, RobustScaler):
     """
     PURPOSE: Scale our data using the RobustScaler method from the sklearn library
     METHOD: Generate data using 1 timesteps and then remove the NaN or None types to use the scaler methods
@@ -35,10 +35,10 @@ def build_scaled_ml_dataset(timesteps=1, remove_missing=True, train_test_data: d
     """
 
     # Load the scaled train/test data and the scaler if they exists and are not stale
-    if path.exists(SCALED_TRAIN_TEST_NPZ_FILE) and path.exists(SCALER_FILE) and not is_source_modified(
-            HURRICANE_SOURCE_FILE, SCALED_TRAIN_TEST_NPZ_FILE):
+    if path.exists(TRAIN_TEST_NPZ_FILE) and path.exists(SCALER_FILE) and not is_source_modified(
+            HURRICANE_SOURCE_FILE, TRAIN_TEST_NPZ_FILE):
         # Load serialized scaled data
-        data = np.load(SCALED_TRAIN_TEST_NPZ_FILE)
+        data = np.load(TRAIN_TEST_NPZ_FILE)
         scaled_data = {'x': data['x'], 'y': data['y']}
 
         # Load scaler
@@ -47,16 +47,19 @@ def build_scaled_ml_dataset(timesteps=1, remove_missing=True, train_test_data: d
 
         return scaled_data, feature_scaler
 
-    # Get the training/testing dataset
-    train_test_data = build_ml_dataset(timesteps, remove_missing) if train_test_data is None else train_test_data
+    # Create the training/testing dataset on a single timestep basis for fitting the scaler
+    per_timestep_data = build_ml_dataset(timesteps=1, remove_missing=remove_missing)
 
     # Reshape training data to fit scaler
-    x = np.reshape(train_test_data['x'], (train_test_data['x'].shape[0], -1))
+    x = np.reshape(per_timestep_data['x'], (per_timestep_data['x'].shape[0], -1))
     x = np.delete(x, np.where(np.isnan(x))[0], 0)
 
     # Create and fit scaler
     feature_scaler = RobustScaler()
     feature_scaler.fit(x)
+
+    # Create the training/testing dataset with the specified lookahead times teps
+    train_test_data = build_ml_dataset(timesteps, remove_missing) if train_test_data is None else train_test_data
 
     # Scale our data
     for index in range(len(train_test_data['x'])):
@@ -66,9 +69,11 @@ def build_scaled_ml_dataset(timesteps=1, remove_missing=True, train_test_data: d
         train_test_data['y'][index] = feature_scaler.transform(train_test_data['y'][index])
 
     # Serialize the scaled data
-    np.savez(SCALED_TRAIN_TEST_NPZ_FILE, x=train_test_data['x'], y=train_test_data['y'])
+    os.makedirs(os.path.dirname(TRAIN_TEST_NPZ_FILE), exist_ok=True)
+    np.savez(TRAIN_TEST_NPZ_FILE, x=train_test_data['x'], y=train_test_data['y'])
 
     # Serialize the feature scaler
+    os.makedirs(os.path.dirname(SCALER_FILE), exist_ok=True)
     with open(SCALER_FILE, 'wb') as out_file:
         pkl.dump(feature_scaler, out_file)
 
@@ -84,11 +89,6 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     :param remove_missing: Boolean indicating whether the algorithm will disregard missing values
     :return: Numpy array of shape (samples, timesteps, 11) where 11 is the number of predictors in a hurricane object
     """
-
-    # Load train/test data from serialized npz file if it exists and is not stale
-    if path.exists(TRAIN_TEST_NPZ_FILE) and not is_source_modified(HURRICANE_SOURCE_FILE, TRAIN_TEST_NPZ_FILE):
-        data = np.load(TRAIN_TEST_NPZ_FILE)
-        return {'x': data['x'], 'y': data['y']}
 
     x = []
     y = []
@@ -142,13 +142,10 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     # Convert training and testing datasets to numpy arrays
     x, y = np.array(x), np.array(y)
 
-    # Serialize train and test data
-    np.savez(TRAIN_TEST_NPZ_FILE, x=x, y=y)
-
     return {'x': x, 'y': y}
 
 
-def _get_hurricane_observations(storm: HurricaneDataContainer, timesteps=1, lag=24) -> dict:
+def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
     """
     PURPOSE: Create independent and dependent samples for a machine learning model based on the timesteps
     METHOD: Use the HURDAT2 database and a hurricane object as defined in hurricane-net for feature extraction
