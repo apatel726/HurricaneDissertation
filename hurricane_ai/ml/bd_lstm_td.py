@@ -1,8 +1,8 @@
 import json
-import os
+import logging
 from os import path
+import os
 
-import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Bidirectional
 from tensorflow.keras.layers import Dense
@@ -17,7 +17,7 @@ class BidrectionalLstmHurricaneModel:
     Class encapsulating a single-output bi-directional LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2):
+    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular'):
         """
         Set default training parameters and instantiate the model architecture.
         :param shape: The input shape.
@@ -31,11 +31,7 @@ class BidrectionalLstmHurricaneModel:
         self.loss = loss
         self.optimizer = optimizer
         self.validation_split = validation_split
-
-        # This is a fix for random DNN implementation error in TF2
-        physical_devices = tf.config.list_physical_devices('GPU')
-        tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-
+        self.mode = mode
         self.model = self._build_model()
 
     def _build_model(self) -> Sequential:
@@ -47,7 +43,10 @@ class BidrectionalLstmHurricaneModel:
         model = Sequential()
         model.add(Bidirectional(LSTM(units=512, return_sequences=True, dropout=0.05), input_shape=self.input_shape))
         model.add(LSTM(units=256, return_sequences=True, dropout=0.05))
-        model.add(TimeDistributed(Dense(1)))
+        if self.mode == 'singular' :
+            model.add(TimeDistributed(Dense(1)))
+        elif self.mode == 'universal' :
+            model.add(TimeDistributed(Dense(3)))
         model.compile(loss=self.loss, optimizer=self.optimizer)
 
         return model
