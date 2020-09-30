@@ -28,6 +28,7 @@ else :
     mode = 'universal'
 
 def singular() :
+    global y_train, y_test, X_train, X_test
     # Wind intensity train/test features
     y_train_wind = data_utils.subset_features(y_train, 2)
     y_test_wind = data_utils.subset_features(y_test, 2)
@@ -59,6 +60,7 @@ def singular() :
 def universal() :
     # Create universal features
     # Train for wind intensity (index 0), lat (index 1), long (index 2).
+    global y_train, y_test, X_train, X_test
     y_train = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_train], dtype = np.float64)
     y_test = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_test], dtype = np.float64)
 
