@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-jupyter
+FROM tensorflow/tensorflow:2.2.1-py3-jupyter
 COPY files/ /tf/huraim
 RUN pip install -r /tf/huraim/requirements.txt
 
