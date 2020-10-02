@@ -15,7 +15,7 @@ docker run -it -p 8888:8888 huraim
 ```
 
 After running the above commands, open up a web browser and go to
-`localhost:8888`. It will ask for a token or password which is **huraim1337**.
+`localhost:8888`.
 
 ### Notebook for Running the Universal Model
 

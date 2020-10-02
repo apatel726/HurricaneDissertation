@@ -1,0 +1,51 @@
+# HURAIM
+
+**Hur**ricane **A**rtificial **I**ntelligence using **M**achine Learning 
+
+# Quickstart
+
+Model Command Line Arguments
+----------------------------
+
+Create the model specified with the command line. e.g.
+
+    >>> python run.py --universal
+    >>> python run.py --singular
+
+Accepts command line argument as either,
+    universal
+        Creates a universal model with wind intensity, lat, and long
+    singular
+        Creates singular models with 3 different models for wind, lat and long
+If none are specified, we create a universal model
+
+Training Command Line Arguments
+-------------------------------
+
+`--load`
+
+If there are models in the ml/models directory, we will use the files and weights in them according to the mode
+
+        >>> python run.py --load                # loads the universal model weights
+        >>> python run.py --singular --load     # loads the singular model weights
+`--epochs [int]`
+
+The number of epochs to train the model
+
+        >>> python run.py --singular --epochs 100
+
+## Docker Quickstart
+
+_Please note that this was taken from the docker/Docker.md file. Reference it for the most up to date documentation_
+
+
+Install Docker first. This Dockerfile should work on any OS. Please note that
+the following commands should be run inside the `docker` folder.
+
+```bash
+docker build -t huraim .
+docker run -it -p 8888:8888 huraim
+```
+
+After running the above commands, open up a web browser and go to
+`localhost:8888`. 
