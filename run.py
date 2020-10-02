@@ -82,7 +82,7 @@ def singular() :
     y_train_lon = data_utils.subset_features(y_train, 1)
     y_test_lon = data_utils.subset_features(y_test, 1)
     
-    log('Create and train bidirectional LSTM models for wind speed and track in isolation')
+    # Create and train bidirectional LSTM models for wind speed and track in isolation
     
     log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind')
