@@ -71,11 +71,13 @@ def singular() :
     
     # Create and train bidirectional LSTM wind model
     bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind')
-    bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind)
+    bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, load_if_exists = args.load,
+                                                           epochs = args.epochs)
     
     # Create and train bidirectional LSTM track model
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat')
-    bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat)
+    bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat, load_if_exists = args.load,
+                                                           epochs = args.epochs)
     bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon')
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
                                                            epochs = args.epochs)
