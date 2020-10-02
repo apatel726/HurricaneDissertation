@@ -1,13 +1,27 @@
 from sklearn import model_selection
 import numpy as np
-import argparse # for command line arguments
+import datetime
+import argparse
 
 from hurricane_ai import data_utils
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 
+def log(message) :
+    '''
+    Creates a log system output in the message format below,
+    [Timestamp] [HURAIM] : message
+
+    Parameters
+    ----------
+    message str
+        The message to log
+    '''
+    print(f'[{datetime.datetime.utcnow().isoformat()}Z] [HURAIM] {message}')
+
+log('Creating scaled dataset')
 scaled_train_test_data, feature_scaler = data_utils.build_scaled_ml_dataset(timesteps=5)
 
-# Create our cross validation data structure
+log('Creating our cross validation data structure')
 X_train, X_test, y_train, y_test = model_selection.train_test_split(scaled_train_test_data['x'],
                                                                     scaled_train_test_data['y'], test_size=0.2)
 
@@ -54,6 +68,7 @@ parser.add_argument("--epochs", help = "Number of epochs to train the model", ty
 parser.add_argument("--load", help = "Loads existing model weights in the repository", action = "store_true")
 
 args = parser.parse_args()
+log(str(args))
 
 def singular() :
     global y_train, y_test, X_train, X_test, args
@@ -67,14 +82,14 @@ def singular() :
     y_train_lon = data_utils.subset_features(y_train, 1)
     y_test_lon = data_utils.subset_features(y_test, 1)
     
-    # Create and train bidirectional LSTM models for wind speed and track in isolation
+    log('Create and train bidirectional LSTM models for wind speed and track in isolation')
     
-    # Create and train bidirectional LSTM wind model
+    log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind')
     bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, load_if_exists = args.load,
                                                            epochs = args.epochs)
     
-    # Create and train bidirectional LSTM track model
+    log('Create and train bidirectional LSTM track model')
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat')
     bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat, load_if_exists = args.load,
                                                            epochs = args.epochs)
@@ -89,13 +104,13 @@ def singular() :
         }
 
 def universal() :
-    # Create universal features
-    # Train for wind intensity (index 0), lat (index 1), long (index 2).
+    log('Create universal features')
+    log('Train for wind intensity (index 0), lat (index 1), long (index 2).')
     global y_train, y_test, X_train, X_test, args
     y_train = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_train], dtype = np.float64)
     y_test = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_test], dtype = np.float64)
 
-    # Create and train bidirectional LSTM wind model
+    log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_universal = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'universal',
                                                                 mode = 'universal')
     bidir_lstm_model_universal_hist = bidir_lstm_model_universal.train(X_train, y_train, load_if_exists = args.load,
@@ -109,3 +124,4 @@ elif args.universal :
     model = universal()
 else :
     model = universal()
+log('Completed this run!')
