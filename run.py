@@ -12,20 +12,29 @@ X_train, X_test, y_train, y_test = model_selection.train_test_split(scaled_train
                                                                     scaled_train_test_data['y'], test_size=0.2)
 
 '''
+Model Command Line Arguments
+----------------------------
+
 Create the model specified with the command line. e.g.
-    >>> python run.py universal
-    >>> python run.py singular
-Accepts 1 command line as either,
+    >>> python run.py --universal
+    >>> python run.py --singular
+Accepts command line argument as either,
     universal
         Creates a universal model with wind intensity, lat, and long
     singular
         Creates singular models with 3 different models for wind, lat and long
 If none are specified, we create a universal model
 
-Other command line arguments include,
+Training Command Line Arguments
+-------------------------------
+
+If there are models in the ml/models directory, we will use the files and weights in them according to the mode
+    >>> python run.py --load                # loads the universal model weights
+    >>> python run.py --singular --load     # loads the singular model weights
 
 References
 ----------
+
 https://docs.python.org/2/howto/argparse.html
 
 '''
@@ -33,7 +42,7 @@ parser = argparse.ArgumentParser()
 # flags for model
 parser.add_argument("--singular", help = "The 'singular' version of the architecture will be used",
                     action = "store_true")
-parser.add_argument("--universal", help = "The 'universal' version of the architecture will be used",
+parser.add_argument("--universal", help = "The 'universal' version of the architecture will be used in ml/models",
                     action = "store_true")
 
 # flags for the training
