@@ -28,14 +28,18 @@ If none are specified, we create a universal model
 Training Command Line Arguments
 -------------------------------
 
-If there are models in the ml/models directory, we will use the files and weights in them according to the mode
-    >>> python run.py --load                # loads the universal model weights
-    >>> python run.py --singular --load     # loads the singular model weights
+--load
+    If there are models in the ml/models directory, we will use the files and weights in them according to the mode
+        >>> python run.py --load                # loads the universal model weights
+        >>> python run.py --singular --load     # loads the singular model weights
+--epochs [int]
+    The number of epochs to train the model
+        >>> python run.py --singular --epochs 100
 
 References
 ----------
 
-https://docs.python.org/2/howto/argparse.html
+https://docs.python.org/3/howto/argparse.html
 
 '''
 parser = argparse.ArgumentParser()
@@ -46,6 +50,7 @@ parser.add_argument("--universal", help = "The 'universal' version of the archit
                     action = "store_true")
 
 # flags for the training
+parser.add_argument("--epochs", help = "Number of epochs to train the model", type = int, default = 50)
 parser.add_argument("--load", help = "Loads existing model weights in the repository", action = "store_true")
 
 args = parser.parse_args()
@@ -72,7 +77,8 @@ def singular() :
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat')
     bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat)
     bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon')
-    bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load)
+    bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
+                                                           epochs = args.epochs)
     
     return {
         'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
@@ -88,8 +94,10 @@ def universal() :
     y_test = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_test], dtype = np.float64)
 
     # Create and train bidirectional LSTM wind model
-    bidir_lstm_model_universal = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'universal', mode = 'universal')
-    bidir_lstm_model_universal_hist = bidir_lstm_model_universal.train(X_train, y_train, load_if_exists = args.load)
+    bidir_lstm_model_universal = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'universal',
+                                                                mode = 'universal')
+    bidir_lstm_model_universal_hist = bidir_lstm_model_universal.train(X_train, y_train, load_if_exists = args.load,
+                                                                       epochs = args.epochs)
     
     return bidir_lstm_model_universal, bidir_lstm_model_universal_hist
 
