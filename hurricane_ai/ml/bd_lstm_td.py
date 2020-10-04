@@ -17,7 +17,7 @@ class BidrectionalLstmHurricaneModel:
     Class encapsulating a single-output bi-directional LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular'):
+    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular', dropout=0.05):
         """
         Set default training parameters and instantiate the model architecture.
         :param shape: The input shape.
@@ -32,6 +32,7 @@ class BidrectionalLstmHurricaneModel:
         self.optimizer = optimizer
         self.validation_split = validation_split
         self.mode = mode
+        self.dropout = dropout
         self.model = self._build_model()
 
     def _build_model(self) -> Sequential:
@@ -41,7 +42,7 @@ class BidrectionalLstmHurricaneModel:
         """
 
         model = Sequential()
-        model.add(Bidirectional(LSTM(units=512, return_sequences=True, dropout=0.05), input_shape=self.input_shape))
+        model.add(Bidirectional(LSTM(units=512, return_sequences=True, dropout=self.dropout), input_shape=self.input_shape))
         model.add(LSTM(units=256, return_sequences=True, dropout=0.05))
         if self.mode == 'singular' :
             model.add(TimeDistributed(Dense(1)))

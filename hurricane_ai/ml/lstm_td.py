@@ -15,7 +15,7 @@ class LstmHurricaneModel:
     Class encapsulating a single-output LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2):
+    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, dropout=0.05):
         """
         Set default training parameters and instantiate the model architecture.
         :param shape: The input shape.
@@ -29,6 +29,7 @@ class LstmHurricaneModel:
         self.loss = loss
         self.optimizer = optimizer
         self.validation_split = validation_split
+        self.dropout = dropout
         self.model = self._build_model()
 
     def _build_model(self) -> Sequential:
@@ -38,7 +39,7 @@ class LstmHurricaneModel:
         """
 
         model = Sequential()
-        model.add(LSTM(units=1024, input_shape=self.input_shape, return_sequences=True))
+        model.add(LSTM(units=1024, input_shape=self.input_shape, return_sequences=True, dropout = self.dropout))
         model.add(TimeDistributed(Dense(1)))
         model.compile(loss=self.loss, optimizer=self.optimizer)
 
