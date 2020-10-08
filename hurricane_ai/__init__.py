@@ -47,13 +47,13 @@ def save(model, history, prefix = 'results/model') :
         The prefix of the filename. This can also be the file path
     '''
     # Create model name
-    fname_model = f'{prefix}_{datetime.datetime.utcnow().isoformat()}Z'
+    fname_model = f'{prefix}_{datetime.datetime.utcnow().isoformat()}Z.h5'
     # Create history name
-    fname_history = f'history_{datetime.datetime.utcnow().isoformat()}Z'
+    fname_history = f'{prefix}_history_{datetime.datetime.utcnow().isoformat()}Z.csv'
     
     # Save the model
     model.save(fname_model)
     
     # Save the history
-    with open(f'{fname_model}/{fname_history}.csv', 'w+') as out_history:
+    with open(fname_history, 'w+') as out_history:
         json.dump(history.history, out_history)
