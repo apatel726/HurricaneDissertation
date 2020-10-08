@@ -1,3 +1,6 @@
+import tensorflow
+import datetime
+import json
 import os
 
 # Base directory of project
@@ -29,3 +32,28 @@ def is_source_modified(source_file, processed_file):
     :return: Boolean indicator of whether the source has been modified.
     """
     return os.path.getmtime(source_file) > os.path.getmtime(processed_file)
+
+def save(model, history, prefix = 'results/model') :
+    '''
+    Uses SavedModel to save a directory for the models and a CSV for the history
+    
+    Parameters
+    ----------
+    model tf.keras.Model
+        The model we will use to save
+    history tf.keras.callbacks.History
+        The history from the model
+    prefix string
+        The prefix of the filename. This can also be the file path
+    '''
+    # Create model name
+    fname_model = f'{prefix}_{datetime.datetime.utcnow().isoformat()}Z'
+    # Create history name
+    fname_history = f'history_{datetime.datetime.utcnow().isoformat()}Z'
+    
+    # Save the model
+    model.save(fname_model)
+    
+    # Save the history
+    with open(f'{fname_model}/{fname_history}.csv', 'w+') as out_history:
+        json.dump(history.history, out_history)

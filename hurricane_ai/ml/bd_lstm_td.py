@@ -9,8 +9,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import TimeDistributed
 
-from hurricane_ai import BD_LSTM_TD_MODEL, BD_LSTM_TD_MODEL_HIST
-
+from hurricane_ai import BD_LSTM_TD_MODEL, BD_LSTM_TD_MODEL_HIST, save
 
 class BidrectionalLstmHurricaneModel:
     """
@@ -82,13 +81,8 @@ class BidrectionalLstmHurricaneModel:
         history = self.model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
                                  validation_split=self.validation_split, verbose=verbose)
 
-        # Serialize model weights
-        os.makedirs(os.path.dirname(weight_file), exist_ok=True)
-        self.model.save_weights(weight_file)
-
-        # Serialize history to CSV
-        os.makedirs(os.path.dirname(history_file), exist_ok=True)
-        with open(history_file, 'w') as out_file:
-            json.dump(history.history, out_file)
+        # Save model and history
+        save(self.model, history)
+        
 
         return history.history
