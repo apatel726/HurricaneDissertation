@@ -87,19 +87,21 @@ def singular() :
     
     log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind', dropout = args.dropout)
+    log(bidir_lstm_model_wind.get_config())
     bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, load_if_exists = args.load,
                                                            epochs = args.epochs)
-    log(bidir_lstm_model_wind.get_config())
 
     log('Create and train bidirectional LSTM track model')
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat', dropout = args.dropout)
+    log(bidir_lstm_model_lat.get_config())
     bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat, load_if_exists = args.load,
                                                            epochs = args.epochs)
-    log(bidir_lstm_model_lat.get_config())
+    
     bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon', dropout = args.dropout)
+    log(bidir_lstm_model_lon.get_config())
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
                                                            epochs = args.epochs)
-    log(bidir_lstm_model_lon.get_config())
+    
 
     return {
         'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
@@ -117,9 +119,10 @@ def universal() :
     log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_universal = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'universal',
                                                                 mode = 'universal', dropout = args.dropout)
+    log(bidir_lstm_model_universal.get_config())
     bidir_lstm_model_universal_hist = bidir_lstm_model_universal.train(X_train, y_train, load_if_exists = args.load,
                                                                        epochs = args.epochs)
-    
+
     return bidir_lstm_model_universal, bidir_lstm_model_universal_hist
 
 if args.singular :
