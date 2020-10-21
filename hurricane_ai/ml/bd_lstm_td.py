@@ -52,7 +52,8 @@ class BidrectionalLstmHurricaneModel:
             model.add(TimeDistributed(Dense(1)))
         elif self.mode == 'universal' :
             model.add(TimeDistributed(Dense(3)))
-        model.compile(loss=self.loss, optimizer=self.optimizer)
+        model.compile(loss=self.loss, optimizer=self.optimizer, metrics = [tf.keras.metrics.MeanAbsoluteError(),
+                                                                          tf.keras.metrics.MeanAbsolutePercentageError()])
 
         return model
 
@@ -85,7 +86,8 @@ class BidrectionalLstmHurricaneModel:
         # create model directory
         timestamp = datetime.datetime.utcnow().isoformat()
         prefix = 'hurricane_ai/models/'
-        logs = tf.keras.callbacks.TensorBoard(log_dir = f'{prefix}{timestamp}/', histogram_freq = 1)
+        logs = tf.keras.callbacks.TensorBoard(log_dir = f'{prefix}{timestamp}/', histogram_freq = 1,
+                                              profile_batch = 0)
         
         # Train model
         history = self.model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
