@@ -33,7 +33,7 @@ def is_source_modified(source_file, processed_file):
     """
     return os.path.getmtime(source_file) > os.path.getmtime(processed_file)
 
-def save(model, history, prefix = 'results/model') :
+def save(model, history, timestamp, prefix) :
     '''
     Uses HDF5 to save a directory for the models and a CSV for the history
     
@@ -45,15 +45,20 @@ def save(model, history, prefix = 'results/model') :
         The history from the model
     prefix string
         The prefix of the filename. This can also be the file path
+    timestamp datetime
+        A datetime object for when the training started and is used to uniquely identify
+        a model
         
     References
     ----------
     https://www.tensorflow.org/tutorials/keras/save_and_load#hdf5_format
     '''
+    prefix = f'{prefix}{timestamp}/'
+    
     # Create model name
-    fname_model = f'{prefix}_{datetime.datetime.utcnow().isoformat()}Z.h5'
+    fname_model = f'{prefix}model_{timestamp}Z.h5'
     # Create history name
-    fname_history = f'{prefix}_history_{datetime.datetime.utcnow().isoformat()}Z.csv'
+    fname_history = f'{prefix}model_history_{timestamp}Z.csv'
     
     # Save the model
     model.save(fname_model)
@@ -61,3 +66,7 @@ def save(model, history, prefix = 'results/model') :
     # Save the history
     with open(fname_history, 'w+') as out_history:
         json.dump(history.history, out_history)
+
+    # save the hyperparameters
+    with open(f'{prefix}hyperparameters.json', 'w+') as hyperparameters :
+        json.dump(model.get_config(), hyperparameters)

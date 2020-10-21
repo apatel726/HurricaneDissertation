@@ -1,8 +1,10 @@
 import json
 import logging
+import datetime
 from os import path
 import os
 
+import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Bidirectional
 from tensorflow.keras.layers import Dense
@@ -77,12 +79,18 @@ class BidrectionalLstmHurricaneModel:
 
             return history
 
+        # create model directory
+        timestamp = datetime.datetime.utcnow().isoformat()
+        prefix = 'hurricane_ai/models/'
+        logs = tf.keras.callbacks.TensorBoard(log_dir = f'{prefix}{timestamp}/', histogram_freq = 1)
+        
         # Train model
         history = self.model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
-                                 validation_split=self.validation_split, verbose=verbose)
+                                 validation_split=self.validation_split, verbose=verbose, 
+                                 callbacks = [logs])
 
         # Save model and history
-        save(self.model, history)
+        save(self.model, history, timestamp, prefix)
         
 
         return history.history
