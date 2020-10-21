@@ -35,7 +35,7 @@ def is_source_modified(source_file, processed_file):
 
 def save(model, history, prefix = 'results/model') :
     '''
-    Uses SavedModel to save a directory for the models and a CSV for the history
+    Uses HDF5 to save a directory for the models and a CSV for the history
     
     Parameters
     ----------
@@ -45,6 +45,10 @@ def save(model, history, prefix = 'results/model') :
         The history from the model
     prefix string
         The prefix of the filename. This can also be the file path
+        
+    References
+    ----------
+    https://www.tensorflow.org/tutorials/keras/save_and_load#hdf5_format
     '''
     # Create model name
     fname_model = f'{prefix}_{datetime.datetime.utcnow().isoformat()}Z.h5'
