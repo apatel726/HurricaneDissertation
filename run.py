@@ -65,9 +65,13 @@ parser.add_argument("--universal", help = "The 'universal' version of the archit
                     action = "store_true")
 
 # flags for the training
-parser.add_argument("--epochs", help = "Number of epochs to train the model", type = int, default = 50)
 parser.add_argument("--load", help = "Loads existing model weights in the repository", action = "store_true")
+
+# hyperparameters
+parser.add_argument("--epochs", help = "Number of epochs to train the model", type = int, default = 50)
 parser.add_argument("--dropout", help = "The dropout hyperparameter", type = float, default = 0.05)
+parser.add_argument("--loss", help = "The loss hyperparameter", default = 'mse')
+parser.add_argument("--optimizer", help = "The optimizer hyperparameter", default = 'adadelta')
 
 args = parser.parse_args()
 log(str(args))
@@ -87,18 +91,21 @@ def singular() :
     # Create and train bidirectional LSTM models for wind speed and track in isolation
     
     log('Create and train bidirectional LSTM wind model')
-    bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind', dropout = args.dropout)
+    bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind', dropout = args.dropout,
+                                                          loss = args.loss, optimizer = args.optimizer, args = args)
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_wind.get_config()))
     bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, load_if_exists = args.load,
                                                            epochs = args.epochs)
 
     log('Create and train bidirectional LSTM track model')
-    bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat', dropout = args.dropout)
+    bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat', dropout = args.dropout,
+                                                         loss = args.loss, optimizer = args.optimizer, args = args)
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_lat.get_config()))
     bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat, load_if_exists = args.load,
                                                            epochs = args.epochs)
     
-    bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon', dropout = args.dropout)
+    bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon', dropout = args.dropout,
+                                                         loss = args.loss, optimizer = args.optimizer, args = args)
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_lon.get_config()))
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
                                                            epochs = args.epochs)
@@ -119,7 +126,8 @@ def universal() :
 
     log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_universal = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'universal',
-                                                                mode = 'universal', dropout = args.dropout)
+                                                                mode = 'universal', dropout = args.dropout,
+                                                                loss = args.loss, optimizer = args.optimizer, args = args)
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_universal.model.get_config()))
     bidir_lstm_model_universal_hist = bidir_lstm_model_universal.train(X_train, y_train, load_if_exists = args.load,
                                                                        epochs = args.epochs)

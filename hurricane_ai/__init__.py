@@ -33,7 +33,7 @@ def is_source_modified(source_file, processed_file):
     """
     return os.path.getmtime(source_file) > os.path.getmtime(processed_file)
 
-def save(model, history, timestamp, prefix) :
+def save(model, history, timestamp, prefix, args) :
     '''
     Uses HDF5 to save a directory for the models and a CSV for the history
     
@@ -48,6 +48,8 @@ def save(model, history, timestamp, prefix) :
     timestamp datetime
         A datetime object for when the training started and is used to uniquely identify
         a model
+    args dict
+        A dictionary containing the arguments and hyperparameters
         
     References
     ----------
@@ -68,5 +70,6 @@ def save(model, history, timestamp, prefix) :
         json.dump(history.history, out_history)
 
     # save the hyperparameters
+    args['config'] = model.get_config()
     with open(f'{prefix}hyperparameters.json', 'w+') as hyperparameters :
-        json.dump(model.get_config(), hyperparameters)
+        json.dump(args, hyperparameters)
