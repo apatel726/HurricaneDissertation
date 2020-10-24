@@ -1,5 +1,6 @@
 import tensorflow
 import datetime
+import pickle
 import json
 import os
 
@@ -33,7 +34,7 @@ def is_source_modified(source_file, processed_file):
     """
     return os.path.getmtime(source_file) > os.path.getmtime(processed_file)
 
-def save(model, history, timestamp, prefix, args) :
+def save(model, history, timestamp, prefix, args, scaler) :
     '''
     Uses HDF5 to save a directory for the models and a CSV for the history
     
@@ -50,6 +51,8 @@ def save(model, history, timestamp, prefix, args) :
         a model
     args dict
         A dictionary containing the arguments and hyperparameters
+    scaler RobustScaler
+        The scaler used to scale to and from the ground data
         
     References
     ----------
@@ -73,3 +76,6 @@ def save(model, history, timestamp, prefix, args) :
     args['config'] = model.get_config()
     with open(f'{prefix}hyperparameters.json', 'w+') as hyperparameters :
         json.dump(args, hyperparameters)
+        
+    # save the scaler
+    pickle.dump(scaler, open(f'{prefix}feature_scaler.pkl', 'wb' ))

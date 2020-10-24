@@ -18,7 +18,7 @@ class BidrectionalLstmHurricaneModel:
     Class encapsulating a single-output bi-directional LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular', dropout=0.05, args = {}):
+    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular', dropout=0.05, args = {}, scaler = None):
         """
         Set default training parameters and instantiate the model architecture.
         :param shape: The input shape.
@@ -28,6 +28,7 @@ class BidrectionalLstmHurricaneModel:
         :param validation_split: The percentage of the training dataset to use for validation.
         :param mode: universal or singular architecture
         :param args: the command line arguments containing hyperparameters
+        :param args: The RobustScaler used
         """
         self.input_shape = shape
         self.predicted_var = predicted_var
@@ -37,6 +38,7 @@ class BidrectionalLstmHurricaneModel:
         self.mode = mode
         self.dropout = dropout
         self.args = args
+        self.scaler = scaler
         self.model = self._build_model()
 
     def _build_model(self) -> Sequential:
@@ -95,7 +97,7 @@ class BidrectionalLstmHurricaneModel:
                                  callbacks = [logs])
 
         # Save model and history
-        save(self.model, history, timestamp, prefix, vars(self.args))
+        save(self.model, history, timestamp, prefix, vars(self.args), self.scaler)
         
 
         return history.history
