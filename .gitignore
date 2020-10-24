@@ -1,2 +1,3 @@
-/hurricane_ai/data/
-/hurricane_ai/data/
+.idea*
+*.pyc
+*.ipynb_checkpoints*

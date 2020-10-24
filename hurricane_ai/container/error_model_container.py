@@ -9,6 +9,7 @@ import datetime
 import pickle as pkl
 from datetime import timedelta
 from os import path
+import os
 
 from hurricane_ai import ERROR_SOURCE_FILE, ERROR_PKL_FILE, is_source_modified
 
@@ -76,6 +77,7 @@ class ErrorModelContainer:
         self.error_models = self._parse_from_raw(ERROR_SOURCE_FILE)
 
         # Serialize error models to file
+        os.makedirs(os.path.dirname(ERROR_PKL_FILE), exist_ok=True)
         with open(ERROR_PKL_FILE, 'wb') as out_file:
             pkl.dump(self.error_models, out_file)
 
