@@ -26,6 +26,7 @@ Training Command Line Arguments
 
 If there are models in the ml/models directory, we will use the files and weights in them according to the mode
 
+        >>> python run.py                       # trains the artificial intelligence
         >>> python run.py --load                # loads the universal model weights
         >>> python run.py --singular --load     # loads the singular model weights
 `--epochs [int]`
