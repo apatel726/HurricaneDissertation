@@ -33,6 +33,21 @@ If there are models in the ml/models directory, we will use the files and weight
 The number of epochs to train the model
 
         >>> python run.py --singular --epochs 100
+Tutorial
+
+    python run.py -h
+    usage: run.py [-h] [--singular] [--universal] [--load] [--epochs EPOCHS] [--dropout DROPOUT] [--loss LOSS] [--optimizer OPTIMIZER]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --singular            The 'singular' version of the architecture will be used
+      --universal           The 'universal' version of the architecture will be used in ml/models
+      --load                Loads existing model weights in the repository
+      --epochs EPOCHS       Number of epochs to train the model
+      --dropout DROPOUT     The dropout hyperparameter
+      --loss LOSS           The loss hyperparameter
+      --optimizer OPTIMIZER
+                            The optimizer hyperparameter
 
 ## Docker Quickstart
 
