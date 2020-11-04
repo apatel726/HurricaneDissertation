@@ -3,6 +3,9 @@ import logging
 import datetime
 from os import path
 import os
+import pickle as pkl
+import pandas as pd
+import numpy as np
 
 import tensorflow as tf
 from tensorflow.keras import Sequential
@@ -10,6 +13,7 @@ from tensorflow.keras.layers import Bidirectional
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import TimeDistributed
+from tensorflow.keras.models import load_model
 
 from hurricane_ai import BD_LSTM_TD_MODEL, BD_LSTM_TD_MODEL_HIST, save
 
@@ -18,7 +22,8 @@ class BidrectionalLstmHurricaneModel:
     Class encapsulating a single-output bi-directional LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2, mode='singular', dropout=0.05, args = {}, scaler = None):
+    def __init__(self, shape, predicted_var: str, loss='mse', optimizer='adadelta', validation_split=0.2,
+                 mode='singular', dropout=0.05, args={}, scaler_path=None, model_path=None):
         """
         Set default training parameters and instantiate the model architecture.
         :param shape: The input shape.
@@ -28,7 +33,8 @@ class BidrectionalLstmHurricaneModel:
         :param validation_split: The percentage of the training dataset to use for validation.
         :param mode: universal or singular architecture
         :param args: the command line arguments containing hyperparameters
-        :param args: The RobustScaler used
+        :param scaler_path: The path to the pickled scaler file
+        :param model_path: The path to the serialized model file
         """
         self.input_shape = shape
         self.predicted_var = predicted_var
@@ -38,8 +44,17 @@ class BidrectionalLstmHurricaneModel:
         self.mode = mode
         self.dropout = dropout
         self.args = args
-        self.scaler = scaler
-        self.model = self._build_model()
+
+        # Load the feature scaler if one is specified
+        if scaler_path:
+            with open(scaler_path, 'rb') as in_file:
+                self.scaler = pkl.load(in_file)
+
+        # Load model if one is specified, otherwise construct a new one for training
+        if model_path:
+            self.model = load_model(model_path)
+        else:
+            self.model = self._build_model()
 
     def _build_model(self) -> Sequential:
         """
@@ -58,6 +73,7 @@ class BidrectionalLstmHurricaneModel:
                                                                           tf.keras.metrics.MeanAbsolutePercentageError()])
 
         return model
+
 
     def train(self, X_train, y_train, batch_size=5000, epochs=50, load_if_exists=True, verbose=True) -> dict:
         """
@@ -101,3 +117,23 @@ class BidrectionalLstmHurricaneModel:
         
 
         return history.history
+
+    def predict(self, observation_df: pd.DataFrame) -> float:
+        """
+        Runs inference on the given observation data frame.
+
+        :param observation_df: Ground truth hurricane measurements collected to date.
+        :return: Predicted value (e.g. lat, lon, wind)
+        """
+
+        # Normalize data
+        normalized_observations = self.scaler.transform(observation_df.values)
+
+        # Add batch dimension (just 1 for single pass inference)
+        feature_values = np.expand_dims(normalized_observations, 0)
+
+        # Run inference and extract predictions
+        predictions = np.squeeze(self.model.predict(feature_values))
+
+        # Extract and return single prediction
+        return predictions[-1]
