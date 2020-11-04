@@ -9,13 +9,19 @@ Barometric pressure : mb
 Wind Intensity: Knots
 """
 
+import os
 import xmltodict
+import fire
 import requests
 from datetime import datetime
 import dateutil.parser
 from pytz import timezone
 import zipfile
 import io
+import pandas as pd
+from typing import List, Dict
+
+from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 
 def past_track(link):
     '''
@@ -60,7 +66,7 @@ def past_track(link):
 
     return kml
 
-def nhc() :
+def nhc() -> List[Dict[str, List]]:
     '''
     Runs the NHC update and populates current Atlantic storms
     Returns
@@ -163,6 +169,84 @@ def nhc() :
             # add to results
             results.append(storm)
 
+    return results
+
+
+def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
+    """
+    Converts raw observations to data frame and computes derived features.
+
+    :param observations: Raw hurricane kinematic and barometric measurements.
+    :param lag: Number of observation intervals to lag derived features.
+    :return: Data frame of raw and derived hurricane measurements.
+    """
+
+    # Construct data frame from observations and sort by time
+    df = pd.DataFrame(observations).sort_values(by="time")
+
+    # TODO: This assumes everything is UTC - not sure if this is actually the case
+    df["time"] = pd.to_datetime(df["time"], utc=True)
+
+    df = df.assign(
+
+        # Maximum wind speed up to time of observation
+        max_wind=df["wind"].cummax(),
+
+        # Change in wind speed since beginning of five day interval
+        delta_wind=(df["wind"].cummax() - df["wind"].shift(lag).cummax()) / (
+                (df["time"] - df["time"].shift(lag)).dt.seconds / 43200),
+
+        # Minimum pressure up to time of observation
+        min_pressure=df["pressure"].cummin(),
+
+        # Average change in latitudinal position per hour
+        zonal_speed=(df["lat"] - df["lat"].shift(lag)) / ((df["time"] - df["time"].shift(lag)).dt.seconds / 3600),
+
+        # Average change in longitudinal position per hour
+        meridonal_speed=(df["lon"] - df["lon"].shift(lag)) / (
+                (df["time"] - df["time"].shift(lag)).dt.seconds / 3600),
+
+        # Year/month/day/hour
+        year=df["time"].dt.year,
+        month=df["time"].dt.month,
+        day=df["time"].dt.day,
+        hour=df["time"].dt.hour
+    )
+
+    # Remove rows where we didn't have enough historical data to compute derived features
+    df = df.dropna()
+
+    return df
+
+
+def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -> None:
+    """
+    Pulls live storm data and runs single pass inference for every storm.
+
+    :param base_directory: Path to directory containing serialized artifacts (e.g. models, scalers).
+    :param model_file: Filename of the model file.
+    :param scaler_file: Filename of the scaler file.
+    """
+
+    # 5 day lag
+    lag = 5
+
+    # Initialize model
+    model = BidrectionalLstmHurricaneModel((None, None), "wind", model_path=os.path.join(base_directory, model_file),
+                                           scaler_path=os.path.join(base_directory, scaler_file))
+
+    # Grab live storm data
+    live_storms = nhc()
+
+    for storm in live_storms:
+        print(f"Running inference for {storm['metadata']['name']}")
+
+        # Build data frame with raw observations and derived features
+        df = prep_hurricane_data(storm["entries"], lag)
+
+        # Run inference on the given observations
+        result = model.predict(df)
+
 
 if __name__ == "__main__" :
-    nhc()
+    fire.Fire(run_live_inference)
