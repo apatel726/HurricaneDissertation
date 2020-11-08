@@ -78,4 +78,5 @@ def save(model, history, timestamp, prefix, args, scaler) :
         json.dump(args, hyperparameters)
         
     # save the scaler
-    pickle.dump(scaler, open(f'{prefix}feature_scaler.pkl', 'wb' ))
+    with open(f'{prefix}feature_scaler.pkl', 'wb') as f:
+        pickle.dump(scaler, f)

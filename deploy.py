@@ -232,8 +232,8 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     lag = 5
 
     # Initialize model
-    model = BidrectionalLstmHurricaneModel((None, None), "wind", model_path=os.path.join(base_directory, model_file),
-                                           scaler_path=os.path.join(base_directory, scaler_file))
+    model = BidrectionalLstmHurricaneModel((None, None), "wind", os.path.join(base_directory, scaler_file),
+                                           model_path=os.path.join(base_directory, model_file))
 
     # Grab live storm data
     live_storms = nhc()
@@ -245,7 +245,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         df = prep_hurricane_data(storm["entries"], lag)
 
         # Run inference on the given observations
-        result = model.predict(df)
+        result = model.predict(df, lag)
 
 
 if __name__ == "__main__" :
