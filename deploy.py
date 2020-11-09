@@ -215,6 +215,7 @@ def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
 
     # Remove rows where we didn't have enough historical data to compute derived features
     df = df.dropna()
+    
 
     return df
 
@@ -232,7 +233,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     lag = 5
 
     # Initialize model
-    model = BidrectionalLstmHurricaneModel((None, None), "wind", os.path.join(base_directory, scaler_file),
+    model = BidrectionalLstmHurricaneModel((None, None), "lat", os.path.join(base_directory, scaler_file),
                                            model_path=os.path.join(base_directory, model_file))
 
     # Grab live storm data
@@ -243,9 +244,11 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
 
         # Build data frame with raw observations and derived features
         df = prep_hurricane_data(storm["entries"], lag)
+        df2 = df.iloc[[0, -1]]
 
         # Run inference on the given observations
         result = model.predict(df, lag)
+        print(df2)
 
 
 if __name__ == "__main__" :
