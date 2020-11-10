@@ -165,4 +165,4 @@ class BidrectionalLstmHurricaneModel:
         predictions = np.squeeze(self.model.predict(feature_values))
 
         # Extract and return single prediction
-        return predictions[-1]
+        return predictions
