@@ -68,10 +68,10 @@ parser.add_argument("--universal", help = "The 'universal' version of the archit
 parser.add_argument("--load", help = "Loads existing model weights in the repository", action = "store_true")
 
 # hyperparameters
-parser.add_argument("--epochs", help = "Number of epochs to train the model", type = int, default = 50)
-parser.add_argument("--dropout", help = "The dropout hyperparameter", type = float, default = 0.05)
+parser.add_argument("--epochs", help = "Number of epochs to train the model", type = int, default = 1000)
+parser.add_argument("--dropout", help = "The dropout hyperparameter", type = float, default = 0.01)
 parser.add_argument("--loss", help = "The loss hyperparameter", default = 'mse')
-parser.add_argument("--optimizer", help = "The optimizer hyperparameter", default = 'adadelta')
+parser.add_argument("--optimizer", help = "The optimizer hyperparameter", default = 'adam')
 
 args = parser.parse_args()
 log(str(args))
