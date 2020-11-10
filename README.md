@@ -49,6 +49,15 @@ Tutorial
       --loss LOSS           The loss hyperparameter
       --optimizer OPTIMIZER
                             The optimizer hyperparameter
+                            
+Tensorboard Quickstart
+----------------------
+
+Enter in the following command inside a Jupyterlab terminal from the Docker setup,
+
+```bash
+tensorboard --logdir /tf/HurricaneDissertation/hurricane_ai/models/ --bind_all
+```
 
 ## Docker Quickstart
 
