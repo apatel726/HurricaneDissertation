@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Sep 15 01:04:55 2020
-@author: Hammad, Akash
+@author: Hammad, Akash, Jonathan
 Scientific units used are as follows,
 Coordinates (Lat, Lon) : Decimal Degrees (DD)
 Timestamp : Python Datetime
@@ -19,6 +19,9 @@ from pytz import timezone
 import zipfile
 import io
 import pandas as pd
+import pickle
+import json
+import hurricane_ai.plotting_utils
 from typing import List, Dict
 
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
@@ -244,11 +247,53 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
 
         # Build data frame with raw observations and derived features
         df = prep_hurricane_data(storm["entries"], lag)
-        df2 = df.iloc[[0, -1]]
-
+       # df2 = df.iloc[[0, -1]]
+        
+        if (len(storm["entries"])) < 20 : # 1 entry = 6 hours, 20 entries is 120 hours (5 days)
+            print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
+            continue
+        
+        # load current model configuration
+        with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
+            config = json.load(f)
+        
         # Run inference on the given observations
         result = model.predict(df, lag)
-        print(df2)
+        #print(df)
+        print('-------------------------------------')
+        #print(result)
+        
+        with open(os.path.join(base_directory, scaler_file), 'rb') as f:
+          scaler = pickle.load(f)
+        
+        # Run inference based on type of model
+        print(config['universal'])
+        if config['universal'] :
+            # Print result
+            for day in range(5) : # 5 days
+                wind_index = 0
+                lat_index = 1
+                long_index = 2
+                
+                # wind
+                wind_result = []
+                wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index]))
+                print(f'{day + 1} day: result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
+                
+                # lat
+                lat_result = []
+                lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day][lat_index]))
+                print(f'{day + 1} day: result lat test:{scaler.inverse_transform(lat_result)[0][0]}')
+                
+                # long
+                long_result = []
+                long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index]))
+                print(f'{day + 1} day: result long test:{scaler.inverse_transform(long_result)[0][1]}')
+            f.close()
+        elif not config['universal'] :
+            print("TODO")
+        else :
+            print('Unknown type of model or not yet configured')
 
 
 if __name__ == "__main__" :
