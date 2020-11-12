@@ -61,7 +61,7 @@ def save(model, history, timestamp, prefix, args, scaler) :
     prefix = f'{prefix}{timestamp}/'
     
     # Create model name
-    fname_model = f'{prefix}model_{timestamp}Z.h5'
+    fname_model = f'{prefix}model_{timestamp}'
     # Create history name
     fname_history = f'{prefix}model_history_{timestamp}Z.csv'
     
@@ -71,7 +71,7 @@ def save(model, history, timestamp, prefix, args, scaler) :
     # Save the history
     with open(fname_history, 'w+') as out_history:
         json.dump(str(history.history), out_history)
-
+    
     # save the hyperparameters
     args['config'] = model.get_config()
     with open(f'{prefix}hyperparameters.json', 'w+') as hyperparameters :

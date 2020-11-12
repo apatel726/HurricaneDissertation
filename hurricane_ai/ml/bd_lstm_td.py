@@ -160,7 +160,7 @@ class BidrectionalLstmHurricaneModel:
 
         # Add batch dimension (just 1 for single pass inference)
         feature_values = np.expand_dims(normalized_features, 0)
-
+        print(f'feature values shape: {feature_values.shape}')
         # Run inference and extract predictions
         predictions = np.squeeze(self.model.predict(feature_values))
 
