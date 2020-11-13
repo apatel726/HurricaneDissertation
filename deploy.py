@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Sep 15 01:04:55 2020
 @author: Hammad, Akash, Jonathan
@@ -178,7 +177,6 @@ def nhc() -> List[Dict[str, List]]:
 def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
     """
     Converts raw observations to data frame and computes derived features.
-
     :param observations: Raw hurricane kinematic and barometric measurements.
     :param lag: Number of observation intervals to lag derived features.
     :return: Data frame of raw and derived hurricane measurements.
@@ -226,7 +224,6 @@ def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
 def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -> None:
     """
     Pulls live storm data and runs single pass inference for every storm.
-
     :param base_directory: Path to directory containing serialized artifacts (e.g. models, scalers).
     :param model_file: Filename of the model file.
     :param scaler_file: Filename of the scaler file.
@@ -236,7 +233,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     lag = 5
 
     # Initialize model
-    model = BidrectionalLstmHurricaneModel((None, None), "lat", os.path.join(base_directory, scaler_file),
+    model = BidrectionalLstmHurricaneModel((None, None), "wind", os.path.join(base_directory, scaler_file),
                                            model_path=os.path.join(base_directory, model_file))
 
     # Grab live storm data
@@ -249,7 +246,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         df = prep_hurricane_data(storm["entries"], lag)
        # df2 = df.iloc[[0, -1]]
         
-        if (len(storm["entries"])) < 20 : # 1 entry = 6 hours, 20 entries is 120 hours (5 days)
+        if (len(storm["entries"])) <= 20 : # 1 entry = 6 hours, 20 entries is 120 hours (5 days)
             print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
             continue
         
@@ -266,7 +263,6 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
           scaler = pickle.load(f)
         
         # Run inference based on type of model
-        print(root['universal'])
         dictimport = root["config"]  
         if root['universal'] :
             # Print result
@@ -278,7 +274,8 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
                 
                 # wind prints the wind for the first 3 days with an input shape of 11 features
                 wind_result = []
-                wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])) #
+                print(result.shape)
+                wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])) 
                 print(f'{day + 1} day: universal result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
                 
                 # lat prints the wind for the first 3 days with an input shape of 11 features
@@ -290,31 +287,27 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
                 long_result = []
                 long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index]))
                 print(f'{day + 1} day: universal result long test:{scaler.inverse_transform(long_result)[0][1]}')
-            f.close() #closes scaler open
+            
         elif not root['universal'] :
             featuresearch = dictimport["name"]
             
             for day in range(3) : # 3 days
-                wind_index = 0
-                lat_index = 1
-                long_index = 2
-            
                 if featuresearch == "sequential":
                     model = "wind"
                     wind_result = []
-                    wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])) #
+                    wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day]))
                     print(f'{day + 1} day: singular result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
                 
                 elif featuresearch == 'sequential_1':
                     model = "lat"
                     lat_result = []
-                    lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day][lat_index]))
+                    lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day]))
                     print(f'{day + 1} day: singular result lat test:{scaler.inverse_transform(lat_result)[0][0]}')
                 
                 else:
                     model = "long"
                     long_result = []
-                    long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index]))
+                    long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day]))
                     print(f'{day + 1} day: singular result long test:{scaler.inverse_transform(long_result)[0][1]}')
         else :
             print('Unknown type of model or not yet configured')
