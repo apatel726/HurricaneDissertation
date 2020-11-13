@@ -97,7 +97,7 @@ def singular() :
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_wind.model.get_config()))
     bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, load_if_exists = args.load,
                                                            epochs = args.epochs)
-    
+"""
     log('Create and train bidirectional LSTM track model')
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat', feature_scaler,
                                                           dropout=args.dropout, loss=args.loss,
@@ -112,17 +112,18 @@ def singular() :
     log(pprint.PrettyPrinter(indent=4).pprint(bidir_lstm_model_lon.model.get_config()))
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
                                                            epochs = args.epochs)
+"""
     
+
         return {
             'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
             'lat' : (bidir_lstm_model_lat, bidir_lstm_model_lat_hist),
-            'lon' : (bidir_lstm_model_lon, bidir_lstm_model_lon_hist)
-        }
+            'long' : (bidir_lstm_model_lon, bidir_lstm_model_lon_hist)}
             
 
 def universal() :
     log('Create universal features')
-    log('Train for wind intensity (index 0), lat (index 1), lon (index 2).')
+    log('Train for wind intensity (index 0), lat (index 1), long (index 2).')
     global y_train, y_test, X_train, X_test, args, feature_scaler
     y_train = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_train], dtype = np.float64)
     y_test = np.array([[[features[2], features[0], features[1]] for features in y] for y in y_test], dtype = np.float64)
