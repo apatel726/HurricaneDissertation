@@ -13,11 +13,11 @@ import fire
 import pandas as pd
 import pickle
 import json
+import csv
 import hurricane_ai.plotting_utils
 from typing import List, Dict
-
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
-from ingest import*
+from ingest import *
 
 def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
     """
@@ -74,14 +74,13 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     # load current model configuration
     with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
         root = json.load(f)
-        dictimport = root["config"]
-        featuresearch = dictimport["name"]
+        typesearch = root["config"]["name"]
         if root['universal'] :
             model_type = "universal"
         else:
-            if featuresearch == "sequential":
+            if typesearch == "sequential":
                 model_type = "wind"
-            elif featuresearch == 'sequential_1':
+            elif typesearch == 'sequential_1':
                 model_type = "lat"
             else:
                 model_type = "long"
@@ -94,7 +93,6 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     # Initialize model
     model = BidrectionalLstmHurricaneModel((None, None), model_type , os.path.join(base_directory, scaler_file),
                                            model_path=os.path.join(base_directory, model_file))
-
     # Grab live storm data
     live_storms = nhc()
 
@@ -103,7 +101,6 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
 
         # Build data frame with raw observations and derived features
         df = prep_hurricane_data(storm["entries"], lag)
-       # df2 = df.iloc[[0, -1]]
         
         if (len(storm["entries"])) <= 20 : # 1 entry = 6 hours, 20 entries is 120 hours (5 days)
             print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
@@ -113,7 +110,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         result = model.predict(df, lag)
         print('-------------------------------------')
         
- #Converts the scaled values  from the model and scaler chosen to real values       
+        #Converts the scaled values  from the model and scaler chosen to real values       
         with open(os.path.join(base_directory, scaler_file), 'rb') as f:
           scaler = pickle.load(f)
         
