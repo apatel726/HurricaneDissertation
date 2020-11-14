@@ -78,14 +78,29 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     :param model_file: Filename of the model file.
     :param scaler_file: Filename of the scaler file.
     """
-
+    # load current model configuration
+    with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
+        root = json.load(f)
+        dictimport = root["config"]
+        featuresearch = dictimport["name"]
+        if root['universal'] :
+            model_type = "universal"
+        else:
+            if featuresearch == "sequential":
+                model_type = "wind"
+            elif featuresearch == 'sequential_1':
+                model_type = "lat"
+            else:
+                model_type = "long"
+                    
+        print(model_type)
+        
     # 5 day lag
     lag = 5
 
     # Initialize model
-    model = BidrectionalLstmHurricaneModel((None, None), "lon", os.path.join(base_directory, scaler_file),
+    model = BidrectionalLstmHurricaneModel((None, None), model_type , os.path.join(base_directory, scaler_file),
                                            model_path=os.path.join(base_directory, model_file))
-    print(model)
 
     # Grab live storm data
     live_storms = nhc()
@@ -101,10 +116,6 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
             print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
             continue
         
-        # load current model configuration
-        with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
-            root = json.load(f)
-        
         # Run inference on the given observations
         result = model.predict(df, lag)
         print('-------------------------------------')
@@ -114,10 +125,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
           scaler = pickle.load(f)
         
         # Run inference based on type of model
-        dictimport = root["config"]  
-        if root['universal'] :
-            # Print result
-            
+        if model_type == "universal" :
             for day in range(3) : # 3 days
                 wind_index = 0
                 lat_index = 1
@@ -125,7 +133,6 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
                 
                 # wind prints the wind for the first 3 days with an input shape of 11 features
                 wind_result = []
-                print(result.shape)
                 wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])) 
                 print(f'{day + 1} day: universal result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
                 
@@ -139,19 +146,14 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
                 long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index]))
                 print(f'{day + 1} day: universal result long test:{scaler.inverse_transform(long_result)[0][1]}')
             
-        elif not root['universal'] :
-            featuresearch = dictimport["name"]
-            
+        elif not model_type == "universal" :
             for day in range(3) : # 3 days
-                if featuresearch == "sequential":
-                    model = "wind"
+                if model_type == "wind" :
                     wind_result = []
                     wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day]))
                     print(f'{day + 1} day: singular result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
                 
-                elif featuresearch == 'sequential_1':
-                    model = "lat"
-                    lat_result = []
+                elif model_type == "lat" : 
                     lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day]))
                     print(f'{day + 1} day: singular result lat test:{scaler.inverse_transform(lat_result)[0][0]}')
                 
