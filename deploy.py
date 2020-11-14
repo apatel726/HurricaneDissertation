@@ -9,14 +9,7 @@ Wind Intensity: Knots
 """
 
 import os
-import xmltodict
 import fire
-import requests
-from datetime import datetime
-import dateutil.parser
-from pytz import timezone
-import zipfile
-import io
 import pandas as pd
 import pickle
 import json
