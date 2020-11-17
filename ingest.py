@@ -11,6 +11,7 @@ Wind Intensity: Knots
 
 import os
 import xmltodict
+import pickle
 import requests
 from datetime import datetime
 import dateutil.parser
@@ -20,10 +21,10 @@ import io
 import hurricane_ai.plotting_utils
 from typing import List, Dict
 
-from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
+PROJ_BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def past_track(link):
-    '''
+    """
     From a KMZ file of a storm in the NHC format, we extract the history
     Parameters
     ----------
@@ -32,7 +33,7 @@ def past_track(link):
     Returns
     -------
     dict
-    '''
+    """
     kmz = requests.get(link)
     uncompressed = zipfile.ZipFile(io.BytesIO(kmz.content))
 
@@ -107,10 +108,15 @@ def nhc() -> List[Dict[str, List]]:
     # create data structure as dictionary
     request = requests.get(static_link)
     data = xmltodict.parse(request.text)
+    #TEST_FILE = os.path.join(PROJ_BASE_DIR, 'results/testfile.txt')
     results = []
+    
+   # f = open(TEST_FILE, 'w')
+   # pickle.dump(data, f)
     
     # return if no storms
     if 'Folder' not in data['kml']['Document'].keys() :
+        print("No curring active storms for ingest")
         return
     
     # parse in storms

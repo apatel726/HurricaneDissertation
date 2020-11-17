@@ -110,7 +110,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         result = model.predict(df, lag)
         print('-------------------------------------')
         
-        #Converts the scaled values  from the model and scaler chosen to real values       
+        # Converts the scaled values  from the model and scaler chosen to real values       
         with open(os.path.join(base_directory, scaler_file), 'rb') as f:
           scaler = pickle.load(f)
         
