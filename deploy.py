@@ -19,51 +19,6 @@ from typing import List, Dict
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 from ingest import *
 
-def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
-    """
-    Converts raw observations to data frame and computes derived features.
-    :param observations: Raw hurricane kinematic and barometric measurements.
-    :param lag: Number of observation intervals to lag derived features.
-    :return: Data frame of raw and derived hurricane measurements.
-    """
-
-    # Construct data frame from observations and sort by time
-    df = pd.DataFrame(observations).sort_values(by="time")
-
-    # TODO: This assumes everything is UTC - not sure if this is actually the case
-    df["time"] = pd.to_datetime(df["time"], utc=True)
-
-    df = df.assign(
-
-        # Maximum wind speed up to time of observation
-        max_wind=df["wind"].cummax(),
-
-        # Change in wind speed since beginning of five day interval
-        delta_wind=(df["wind"].cummax() - df["wind"].shift(lag).cummax()) / (
-                (df["time"] - df["time"].shift(lag)).dt.seconds / 43200),
-
-        # Minimum pressure up to time of observation
-        min_pressure=df["pressure"].cummin(),
-
-        # Average change in latitudinal position per hour
-        zonal_speed=(df["lat"] - df["lat"].shift(lag)) / ((df["time"] - df["time"].shift(lag)).dt.seconds / 3600),
-
-        # Average change in longitudinal position per hour
-        meridonal_speed=(df["lon"] - df["lon"].shift(lag)) / (
-                (df["time"] - df["time"].shift(lag)).dt.seconds / 3600),
-
-        # Year/month/day/hour
-        year=df["time"].dt.year,
-        month=df["time"].dt.month,
-        day=df["time"].dt.day,
-        hour=df["time"].dt.hour
-    )
-
-    # Remove rows where we didn't have enough historical data to compute derived features
-    df = df.dropna()
-    
-    return df
-
 def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -> None:
     """
     Pulls live storm data and runs single pass inference for every storm.
