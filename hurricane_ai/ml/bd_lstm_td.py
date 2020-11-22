@@ -16,7 +16,7 @@ from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.models import load_model
 
-from typing import Union
+from typing import Union, Dict
 
 from hurricane_ai import BD_LSTM_TD_MODEL, BD_LSTM_TD_MODEL_HIST, save
 
@@ -97,11 +97,14 @@ class BidrectionalLstmHurricaneModel:
 
         return model
 
-    def train(self, X_train, y_train, batch_size=5000, epochs=50, load_if_exists=True, verbose=True) -> dict:
+    def train(self, X_train, y_train, X_val, y_val, batch_size=5000, epochs=50, load_if_exists=True,
+              verbose=True) -> Dict:
         """
         Train the model using the given dataset and parameters.
         :param X_train: The training dataset observations.
         :param y_train: The training dataset labels.
+        :param X_val: The validation dataset observations.
+        :param y_val: The validation dataset labels.
         :param batch_size: The number of observations in a mini-batch.
         :param epochs: The number of epochs.
         :param load_if_exists: Indicates whether model should be loaded from disk if it exists.
@@ -131,12 +134,10 @@ class BidrectionalLstmHurricaneModel:
         
         # Train model
         history = self.model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
-                                 validation_split=self.validation_split, verbose=verbose, 
-                                 callbacks = [logs])
+                                 validation_data=(X_val, y_val), verbose=verbose, callbacks=[logs])
 
         # Save model and history
         save(self.model, history, timestamp, prefix, vars(self.args), self.scaler)
-        
 
         return history.history
 

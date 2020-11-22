@@ -70,7 +70,7 @@ def save(model, history, timestamp, prefix, args, scaler) :
     
     # Save the history
     with open(fname_history, 'w+') as out_history:
-        json.dump(str(history.history), out_history)
+        json.dump(history.history, out_history)
     
     # save the hyperparameters
     args['config'] = model.get_config()
