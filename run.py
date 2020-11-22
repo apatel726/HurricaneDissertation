@@ -106,7 +106,7 @@ def singular() :
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, load_if_exists = args.load,
                                                            epochs = args.epochs)
     
-        return {
+    return {
             'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
             'lat' : (bidir_lstm_model_lat, bidir_lstm_model_lat_hist),
             'lon' : (bidir_lstm_model_lon, bidir_lstm_model_lon_hist)

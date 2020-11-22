@@ -99,7 +99,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     # Defines the precision of all hurricane measurements
     precision = np.float64
 
-    # Begin at the first (24 hour) lag with lag increments up to 120h inclusive
+    # Begin at the first (6 hour) lag with lag increments up to 120h inclusive
     times = [time * lag for time in
              range(1, (120 // lag) + 1)]
 
@@ -128,7 +128,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
         if remove_missing:
             if (len(np.where(np.isnan(hurricane_x))[0]) > 0) or (len(np.where(np.isnan(hurricane_y))[0]) > 0):
                 continue
-
+            
         # Increment the number of feature-engineered hurricanes
         count += 1
 
@@ -169,10 +169,12 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
         if index < timesteps:  # Flag for insufficient initial time steps
             continue
 
-        # If we're not including None values, check to see if there will be any
+        # Reference here. Skip value if not enough data, i.e. not using placeholders
+        '''
         if None in [storm.entries.get(entries[index]['entry_time'] +
                                       datetime.timedelta(hours=future)) for future in times]: break
-
+        '''
+        
         # Calculate time steps and their features for independent values
         sample = []
         for step in range(timesteps):
@@ -186,11 +188,9 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
         for future in times:
             timestep = storm.entries.get(entries[index]['entry_time'] + datetime.timedelta(hours=future))
             previous = storm.entries.get(entries[index]['entry_time'] + datetime.timedelta(hours=future - lag))
-
-            if timestep and previous:
-                y[future].append(_extract_features(timestep, previous))
-            else:
-                y[future].append(None)
+            
+            # timestep and previous might be None because of insuficcient data. Placeholders will be used.
+            y[future].append(_extract_features(timestep, previous, placeholders = True))
 
     # Return output, if there is no output, return None.
     if len(x) is 0:
@@ -199,7 +199,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
         return {'x': x, 'y': y}
 
 
-def _extract_features(timestep, previous):
+def _extract_features(timestep, previous, placeholders):
     """
     PURPOSE: Calculate the features for a machine learning model within the context of hurricane-net
     METHOD: Use the predictors and the calculation methodology defined in Knaff 2013
@@ -214,15 +214,23 @@ def _extract_features(timestep, previous):
 
     :param timestep: Current dictionary of features in the hurricane object format
     :param previous: Previous timestep dictionary of features in the hurricane object format
+    :param placeholders: If the algorithm is not using placeholders, this will return None
     :return: Dictionary of features
     """
-
+    
+    # Placeholder values. Reference features variable for real data input
+    placeholder_value = -999999999
+    if placeholders :
+        return {feature : placeholder_value for feature in ['lat', 'long', 'max_wind', 'delta_wind',
+                                                           'min_pressure', 'zonal_speed', 'meridonal_speed',
+                                                            'year', 'month', 'day', 'hour']}
+    
     features = {
         'lat': timestep['lat'],
         'long': timestep['long'],
         'max_wind': timestep['max_wind'],
-        'delta_wind': (timestep['max_wind'] - previous['max_wind']) /  # Calculated from track (12h)
-                      ((timestep['entry_time'] - previous['entry_time']).total_seconds() / 43200),
+        'delta_wind': (timestep['max_wind'] - previous['max_wind']) /  # Calculated from track (6h)
+                      ((timestep['entry_time'] - previous['entry_time']).total_seconds() / 21600),
         'min_pressure': timestep['min_pressure'],
         'zonal_speed': (timestep['lat'] - previous['lat']) /  # Calculated from track (per hour)
                        ((timestep['entry_time'] - previous['entry_time']).total_seconds() / 3600),

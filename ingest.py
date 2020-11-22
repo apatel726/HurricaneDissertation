@@ -198,7 +198,7 @@ def prep_hurricane_data(observations: List, lag: int) -> pd.DataFrame:
 
         # Change in wind speed since beginning of five day interval
         delta_wind=(df["wind"].cummax() - df["wind"].shift(lag).cummax()) / (
-                (df["time"] - df["time"].shift(lag)).dt.seconds / 43200),
+                (df["time"] - df["time"].shift(lag)).dt.seconds / 21600),
 
         # Minimum pressure up to time of observation
         min_pressure=df["pressure"].cummin(),

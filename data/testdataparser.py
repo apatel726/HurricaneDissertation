@@ -14,7 +14,7 @@ class HurricaneDataParserTestData:
     STORM_ENTRY_ROW_LENGTH = 20
     MISSING_PRESSURE_SYM = "-999"
 
-    def __init__(self, filename="hurdat2_2017_2018.txt"):
+    def __init__(self, filename="Katrina.txt"):
         """
         Initializes the hurricane data API
         :param filename:
@@ -22,7 +22,7 @@ class HurricaneDataParserTestData:
         self.test_hurricanes = self._parse(filename)
         return
 
-    def _parse(self, filename="hurdat2_2017_2018.txt"):
+    def _parse(self, filename="Katrina.txt"):
         """
         Parses hurricane data and stores in class member data frame.
         :param filename: Default filename.
@@ -30,6 +30,7 @@ class HurricaneDataParserTestData:
         """
 
         db = []
+        min_entries = 6 #number of entries needed to do inference
 
         with open(filename) as raw:
             csv_reader = csv.reader(raw, delimiter=',', quoting=csv.QUOTE_NONE, skipinitialspace=True)
@@ -47,6 +48,10 @@ class HurricaneDataParserTestData:
                 storm_id = storm_row[0]
                 storm_name = storm_row[1]
                 storm_entries = storm_row[2]
+                
+                if storm_entries < min_entries:
+                    print('The selected file does not have enough entries to make inference')
+                    raise Exception()
 
                 # Skip non-Atlantic storms
                 if storm_row[0][:2] != 'AL':
@@ -82,5 +87,4 @@ class HurricaneDataParserTestData:
 
         return pd.DataFrame(db,
                             columns=['storm_id', 'storm_name', 'entry_time', 'entry_id', 'entry_status', 'lat', 'long',
-                                     'max_wind', 'min_pressure', '34kt_ne', '34kt_se', '34kt_sw', '34kt_nw', '50kt_ne',
-                                     '50kt_se', '50kt_sw', '50kt_nw', '64kt_ne', '64kt_se', '64kt_sw', '64kt_nw'])
+                                     'max_wind', 'min_pressure'])

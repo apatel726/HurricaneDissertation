@@ -42,7 +42,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
                     
         print(model_type)
         
-    # 5 day lag
+    # 5 (6hour) increment depending on how the dataframe is structured
     lag = 5
 
     # Initialize model
@@ -57,7 +57,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         # Build data frame with raw observations and derived features
         df = prep_hurricane_data(storm["entries"], lag)
         
-        if (len(storm["entries"])) <= 20 : # 1 entry = 6 hours, 20 entries is 120 hours (5 days)
+        if (len(storm["entries"])) <= 5 : # 1 entry = 6 hours 
             print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
             continue
         
@@ -71,7 +71,7 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
         
         # Run inference based on type of model
         if model_type == "universal" :
-            for day in range(3) : # 3 days
+            for day in range(4) : #5 6 hour increments
                 wind_index = 0
                 lat_index = 1
                 long_index = 2
