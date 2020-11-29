@@ -19,12 +19,13 @@ from typing import List, Dict
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 from ingest import *
 
-def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -> None:
+def inference(base_directory: str, model_file: str, scaler_file: str, file_type = "test") -> None:
     """
     Pulls live storm data and runs single pass inference for every storm.
     :param base_directory: Path to directory containing serialized artifacts (e.g. models, scalers).
     :param model_file: Filename of the model file.
     :param scaler_file: Filename of the scaler file.
+    :param file_type: String, either "test" or "live"
     """
     # load current model configuration
     with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
@@ -49,16 +50,25 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
     model = BidrectionalLstmHurricaneModel((None, None), model_type , os.path.join(base_directory, scaler_file),
                                            model_path=os.path.join(base_directory, model_file))
     # Grab live storm data
-    live_storms = nhc()
+    # logic for file type
+    if file_type == "live" :
+        storms = nhc()
+    elif type(file_type) == type(list()) :
+        storms = file_type
+    else :
+        print("Unrecognized file type")
+        return
 
-    for storm in live_storms:
-        print(f"Running inference for {storm['metadata']['name']}")
+    #change everything from "live_storms" to "storms" below this line
+    for storm in storms:
+        print(f"Running inference for {storm['storm']}")
 
         # Build data frame with raw observations and derived features
+        print(storm['entries'])
         df = prep_hurricane_data(storm["entries"], lag)
         
         if (len(storm["entries"])) <= 5 : # 1 entry = 6 hours 
-            print(f'{storm["metadata"]["name"]} does not have enough data (minimum 5 days)')
+            print(f'{storm["storm"]} does not have enough data (minimum 5 days)')
             continue
         
         # Run inference on the given observations
@@ -111,4 +121,4 @@ def run_live_inference(base_directory: str, model_file: str, scaler_file: str) -
             print('Unknown type of model or not yet configured')
 
 if __name__ == "__main__" :
-    fire.Fire(run_live_inference)
+    fire.Fire(inference)
