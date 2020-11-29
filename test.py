@@ -21,10 +21,11 @@ args = parser.parse_args()
 with open(args.config) as f :
     config = json.load(f)
 
-# TODO: Read in test file from data_utils.py
+# TODO: Read in test file from hurricanecontrainer.py
 data_container = HurricaneDataContainer()
 data = data_container._parse(args.test)
 
+# TODO: Pass contents to data_utils for data preparation/feature extraction
 # create hurricane objects
 for storm in data.storm_id.unique() :
     # get the storm entries
@@ -32,7 +33,7 @@ for storm in data.storm_id.unique() :
     
     # convert to hurricane object
     hurricane = Hurricane(storm, storm)
-    for index, entry in data.iterrows():
+    for index, entry in entries.iterrows():
         hurricane.add_entry(entry[2:])
     # run inference on this object
     hurricanes = [{ 'entries' : [{
@@ -44,7 +45,6 @@ for storm in data.storm_id.unique() :
         } for time in hurricane.entries],
         'storm' : storm
     }]
-    
     '''
     "entries" : array of dict # The data for the storm in the form,
                 {
@@ -55,11 +55,8 @@ for storm in data.storm_id.unique() :
                     'pressure' : Barometric pressure (mb)
                 }
     '''
+# TODO: Load models and pass prepped data to predict function (in bd_lstm_td.py file)
     inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
         
 
-# TODO: Pass contents to data_utils for data preparation/feature extraction
-
-# TODO: Load models and pass prepped data to predict function (in bd_lstm_td.py file)
-
-# TODO: Take absolute value of difference between predicted and ground truth (e.g. np.abs(y_truth - y_predicted))
+        # TODO: Take absolute value of difference between predicted and ground truth (e.g. np.abs(y_truth - y_predicted))

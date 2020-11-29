@@ -58,13 +58,11 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
     else :
         print("Unrecognized file type")
         return
-
+    print(storms)
     #change everything from "live_storms" to "storms" below this line
     for storm in storms:
         print(f"Running inference for {storm['storm']}")
-
         # Build data frame with raw observations and derived features
-        print(storm['entries'])
         df = prep_hurricane_data(storm["entries"], lag)
         
         if (len(storm["entries"])) <= 5 : # 1 entry = 6 hours 
