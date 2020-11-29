@@ -181,7 +181,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
             # Training sample
             timestep = entries[index - step]
             previous = entries[index - step - 1]
-            sample.append([timestep['entry_time']] + [[_extract_features(timestep, previous)]])
+            sample.append([timestep['entry_time']] + [[_extract_features(timestep, previous, placeholders = True)]])
         x.append(sample)  # Add our constructed sample
 
         # Calculate time steps and their features for dependent values

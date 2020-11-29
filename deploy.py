@@ -11,6 +11,7 @@ Wind Intensity: Knots
 import os
 import fire
 import pandas as pd
+import pprint
 import pickle
 import json
 import csv
@@ -58,7 +59,8 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
     else :
         print("Unrecognized file type")
         return
-    print(storms)
+    pp = pprint.PrettyPrinter()
+    pp.pprint(storms)
     #change everything from "live_storms" to "storms" below this line
     for storm in storms:
         print(f"Running inference for {storm['storm']}")

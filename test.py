@@ -57,6 +57,5 @@ for storm in data.storm_id.unique() :
     '''
 # TODO: Load models and pass prepped data to predict function (in bd_lstm_td.py file)
     inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
-        
 
-        # TODO: Take absolute value of difference between predicted and ground truth (e.g. np.abs(y_truth - y_predicted))
+# TODO: Take absolute value of difference between predicted and ground truth (e.g. np.abs(y_truth - y_predicted))
