@@ -19,6 +19,7 @@ import hurricane_ai.plotting_utils
 from typing import List, Dict
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 from ingest import *
+import simplekml
 
 def inference(base_directory: str, model_file: str, scaler_file: str, file_type = "test") -> None:
     """
@@ -79,6 +80,10 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         with open(os.path.join(base_directory, scaler_file), 'rb') as f:
           scaler = pickle.load(f)
         
+        # Creates kml file for output
+        kml = simplekml.Kml()
+        pnt = kml.newpoint(name="A Point")
+        
         # Run inference based on type of model
         if model_type == "universal" :
             for day in range(4) : #5 6 hour increments
@@ -119,6 +124,16 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
                     print(f'{day + 1} day: singular result long test:{scaler.inverse_transform(long_result)[0][1]}')
         else :
             print('Unknown type of model or not yet configured')
+        
+        # Save as kml
+        print('Saving inference results as KML file')
+        for index, winds in enumerate(wind_result) :
+            wind = winds
+            lat = lat_result[index]
+            long = long_result[index]
 
+            pnt = kml.newpoint(name = f'{storm["storm"]} + {index + 1} Day(s)', description = f'{wind} knots',
+                              coords = [(long, lat)])
+        kml.save(f'{storm["storm"]}.kml')
 if __name__ == "__main__" :
     fire.Fire(inference)
