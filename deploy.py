@@ -19,7 +19,6 @@ import hurricane_ai.plotting_utils
 from typing import List, Dict
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
 from ingest import *
-import simplekml
 
 def inference(base_directory: str, model_file: str, scaler_file: str, file_type = "test") -> None:
     """
@@ -62,7 +61,7 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         return
     pp = pprint.PrettyPrinter()
     pp.pprint(storms)
-    #change everything from "live_storms" to "storms" below this line
+    results = dict()
     for storm in storms:
         print(f"Running inference for {storm['storm']}")
         # Build data frame with raw observations and derived features
@@ -80,11 +79,10 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         with open(os.path.join(base_directory, scaler_file), 'rb') as f:
           scaler = pickle.load(f)
         
-        # Creates kml file for output
-        kml = simplekml.Kml()
-        pnt = kml.newpoint(name="A Point")
-        
         # Run inference based on type of model
+        wind_results = []
+        lat_results = []
+        lon_results = []
         if model_type == "universal" :
             for day in range(4) : #5 6 hour increments
                 wind_index = 0
@@ -92,19 +90,22 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
                 long_index = 2
                 
                 # wind prints the wind for the first 3 days with an input shape of 11 features
-                wind_result = []
-                wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])) 
-                print(f'{day + 1} day: universal result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
+                wind_result = scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[day][wind_index])])[0][2]
+                print(f'{day + 1} day: universal result wind test:{wind_result}')
+                wind_results.append(wind_result)
                 
                 # lat prints the wind for the first 3 days with an input shape of 11 features
-                lat_result = []
-                lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day][lat_index]))
-                print(f'{day + 1} day: universal result lat test:{scaler.inverse_transform(lat_result)[0][0]}')
+                lat_result = scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[day][lat_index])])[0][0]
+                lat_results.append(lat_result)
+                print(f'{day + 1} day: universal result lat test:{lat_result}')
                 
                 # long prints the wind for the first 3 days with an input shape of 11 features
-                long_result = []
-                long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index]))
-                print(f'{day + 1} day: universal result long test:{scaler.inverse_transform(long_result)[0][1]}')
+                long_result = scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[day][long_index])])[0][1]
+                lon_results.append(long_result)
+                print(f'{day + 1} day: universal result long test:{long_result}')
             
         elif not model_type == "universal" :
             for day in range(3) : # 3 days
@@ -125,15 +126,12 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         else :
             print('Unknown type of model or not yet configured')
         
-        # Save as kml
-        print('Saving inference results as KML file')
-        for index, winds in enumerate(wind_result) :
-            wind = winds
-            lat = lat_result[index]
-            long = long_result[index]
-
-            pnt = kml.newpoint(name = f'{storm["storm"]} + {index + 1} Day(s)', description = f'{wind} knots',
-                              coords = [(long, lat)])
-        kml.save(f'{storm["storm"]}.kml')
+        results[storm['storm']] = {
+            'wind' : wind_results,
+            'lat' : lat_results,
+            'lon' : lon_results
+        }
+    
+    return results
 if __name__ == "__main__" :
     fire.Fire(inference)

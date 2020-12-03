@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import simplekml
 from sklearn.preprocessing import RobustScaler
 
 
@@ -71,3 +72,28 @@ def _generate_sparse_feature_vector(vector_length: int, feature_index: int, feat
     features[feature_index] = feature_value
 
     return features
+
+def process_results(results) :
+    import cartopy
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+    
+    ax = plt.axes(projection=cartopy.crs.PlateCarree())
+
+    ax.add_feature(cartopy.feature.LAND)
+    ax.add_feature(cartopy.feature.OCEAN)
+    ax.add_feature(cartopy.feature.COASTLINE)
+    #ax.add_feature(cartopy.feature.BORDERS, linestyle=':')
+    #ax.add_feature(cartopy.feature.LAKES, alpha=0.5)
+    #ax.add_feature(cartopy.feature.RIVERS)
+
+    ax.set_global()
+    
+    for storm in results.values() :
+        for index in range(1, len(storm['lat'])) :
+            ax.plot([storm['lon'][index - 1], storm['lon'][index]], [storm['lat'][index - 1], storm['lat'][index]],
+                     color='gray', linestyle='--',
+                     transform=ccrs.PlateCarree())
+            plt.savefig('test.png', dpi=500)
+    
+    return

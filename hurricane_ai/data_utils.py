@@ -101,7 +101,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
 
     # Begin at the first (6 hour) lag with lag increments up to 120h inclusive
     times = [time * lag for time in
-             range(1, (120 // lag) + 1)]
+             range(1, (30 // lag) + 1)]
 
     # Get the full hurricane dataset
     hurricanes = HurricaneDataContainer()
@@ -145,7 +145,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     return {'x': x, 'y': y}
 
 
-def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
+def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
     """
     PURPOSE: Create independent and dependent samples for a machine learning model based on the timesteps
     METHOD: Use the HURDAT2 database and a hurricane object as defined in hurricane-net for feature extraction
@@ -159,7 +159,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=24) -> dict:
     x = []
     # Create testing data structure with a dictionary
     times = [time * lag for time in
-             range(1, (120 // lag) + 1)]  # Begin at lag hours with lag increments up to 120h inclusive
+             range(1, (30 // lag) + 1)]  # Begin at lag hours with lag increments up to 120h inclusive
     y = dict([(time, []) for time in times])
 
     # Sort by entry time

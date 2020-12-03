@@ -4,6 +4,7 @@ import json
 from deploy import inference
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 from hurricane_ai.container.hurricane_data_container import Hurricane
+from hurricane_ai import plotting_utils
 
 # Create arugment parser for command line interface
 # https://docs.python.org/3/howto/argparse.html
@@ -26,7 +27,7 @@ data_container = HurricaneDataContainer()
 data = data_container._parse(args.test)
 
 # TODO: Pass contents to data_utils for data preparation/feature extraction
-# create hurricane objects
+# create hurricane objects for different unique hurricanes
 for storm in data.storm_id.unique() :
     # get the storm entries
     entries = data[data['storm_id'] == storm]
@@ -55,7 +56,5 @@ for storm in data.storm_id.unique() :
                     'pressure' : Barometric pressure (mb)
                 }
     '''
-# TODO: Load models and pass prepped data to predict function (in bd_lstm_td.py file)
-    inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
-
-# TODO: Take absolute value of difference between predicted and ground truth (e.g. np.abs(y_truth - y_predicted))
+    results = inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
+    plotting_utils.process_results(results)
