@@ -117,7 +117,7 @@ def nhc() -> List[Dict[str, List]]:
     
     # return if no storms
     if 'Folder' not in data['kml']['Document'].keys() :
-        print("No curring active storms for ingest")
+        print("No current active storms for ingest")
         return
     
     # parse in storms
