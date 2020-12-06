@@ -40,7 +40,7 @@ class BidrectionalLstmHurricaneModel:
     Class encapsulating a single-output bi-directional LSTM hurricane model.
     """
 
-    def __init__(self, shape, predicted_var: str, scaler: Union[RobustScaler, str], loss='mse', optimizer='adadelta',
+    def __init__(self, shape, predicted_var: str, scaler: Union[RobustScaler, str], loss='mse', optimizer='adam',
                  validation_split=0.2, mode='singular', dropout=0.05, args={}, model_path=None):
         """
         Set default training parameters and instantiate the model architecture.
