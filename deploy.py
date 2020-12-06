@@ -103,7 +103,7 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
                 print(f'{(increment+1) * 6} hours: universal result lat test:{lat_result}')
                 
                 # long prints the wind for the first 5 (6hour) increments with an input shape of 11 features
-                long_result = scaler.inverse_transform(
+                long_result = -1 * scaler.inverse_transform(
                     [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[increment][long_index])])[0][1]
                 lon_results.append(long_result)
                 print(f'{(increment+1) * 6} hours: universal result long test:{long_result}')
