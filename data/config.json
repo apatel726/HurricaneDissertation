@@ -1,5 +1,6 @@
 {
-"base_directory": "/tf/HurricaneDissertation/hurricane_ai/models/2020_12_03_04_25/", 
-"model_file": "model_2020_12_03_04_25",
-"scaler_file": "feature_scaler.pkl"
+"base_directory": "/tf/HurricaneDissertation/hurricane_ai/models/2020_12_06_06_16/", 
+"model_file": "model_2020_12_06_06_16",
+"scaler_file": "feature_scaler.pkl",
+"test_file": "data/hurdat2_test.txt"
 }
