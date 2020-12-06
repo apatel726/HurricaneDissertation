@@ -11,7 +11,6 @@ from hurricane_ai import plotting_utils
 parser = argparse.ArgumentParser()
 
 # cli flags for input file
-parser.add_argument('--test', help = 'The test file path for the model inference. Can be relative for fixed', default = None)
 parser.add_argument('--config', help = 'The file where all the configuration parameters are located', default = None)
 # cli flags for storm name
 parser.add_argument('--name', help = 'The storm name in the test file to run inference on', default = None)
@@ -24,7 +23,7 @@ with open(args.config) as f :
 
 # TODO: Read in test file from hurricanecontrainer.py
 data_container = HurricaneDataContainer()
-data = data_container._parse(args.test)
+data = data_container._parse(config['test'])
 
 # TODO: Pass contents to data_utils for data preparation/feature extraction
 # create hurricane objects for different unique hurricanes
