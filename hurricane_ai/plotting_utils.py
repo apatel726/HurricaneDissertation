@@ -98,8 +98,11 @@ def process_results(results) :
                      color='gray', linestyle='--',
                      transform=ccrs.PlateCarree())
             plt.savefig('test.png', dpi=500)
-            pnt = kml.newpoint(name = f'{storm["name"]} + delta {index}', description = f'{storm["wind"][index]:.2f} knots',
-                                  coords = [(storm['lon'][index], storm['lat'][index])])
+            pnt = kml.newpoint(name = f'{storm["name"]} + delta {index}',
+                               description = f'{storm["wind"][index]:.2f} knots\n' +
+                               f'{storm["times"][index]}\n' +
+                               f'({storm["lon"][index]}, {storm["lat"][index]}) (Lon, Lat)',
+                               coords = [(storm['lon'][index], storm['lat'][index])])
             pnt.timestamp.when = str(storm['times'][index])
             pnt.extendeddata.newdata(name = 'wind', value = storm["wind"][index], displayname = 'Wind Intensity (knots)')
             
