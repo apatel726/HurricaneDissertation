@@ -165,23 +165,15 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
     # Sort by entry time
     entries = [entry[1] for entry in sorted(storm.entries.items())]
 
-    for index in range(len(entries)):
-        if index < timesteps:  # Flag for insufficient initial time steps
-            continue
-
-        # Reference here. Skip value if not enough data, i.e. not using placeholders
-        '''
-        if None in [storm.entries.get(entries[index]['entry_time'] +
-                                      datetime.timedelta(hours=future)) for future in times]: break
-        '''
-        
+    for index in range(1, len(entries)): # start at 1 because we need a previous entry to calculate some features
         # Calculate time steps and their features for independent values
         sample = []
         for step in range(timesteps):
             # Training sample
             timestep = entries[index - step]
             previous = entries[index - step - 1]
-            sample.append([timestep['entry_time']] + [[_extract_features(timestep, previous, placeholders = True)]])
+            # placeholder if there is not enough history
+            sample.append([timestep['entry_time']] + [[_extract_features(timestep, previous, placeholders = (step > index))]])
         x.append(sample)  # Add our constructed sample
 
         # Calculate time steps and their features for dependent values
@@ -190,7 +182,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
             previous = storm.entries.get(entries[index]['entry_time'] + datetime.timedelta(hours=future - lag))
             
             # timestep and previous might be None because of insuficcient data. Placeholders will be used.
-            y[future].append(_extract_features(timestep, previous, placeholders = True))
+            y[future].append(_extract_features(timestep, previous, placeholders = (timestep is None)))
 
     # Return output, if there is no output, return None.
     if len(x) is 0:
@@ -199,7 +191,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
         return {'x': x, 'y': y}
 
 
-def _extract_features(timestep, previous, placeholders):
+def _extract_features(timestep, previous, placeholders = False):
     """
     PURPOSE: Calculate the features for a machine learning model within the context of hurricane-net
     METHOD: Use the predictors and the calculation methodology defined in Knaff 2013
