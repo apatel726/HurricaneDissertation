@@ -23,7 +23,7 @@ with open(args.config) as f :
 
 # TODO: Read in test file from hurricanecontrainer.py
 data_container = HurricaneDataContainer()
-data = data_container._parse(config['test'])
+data = data_container._parse(config['test_file'])
 
 # TODO: Pass contents to data_utils for data preparation/feature extraction
 # create hurricane objects for different unique hurricanes
@@ -55,5 +55,5 @@ for storm in data.storm_id.unique() :
                     'pressure' : Barometric pressure (mb)
                 }
     '''
-    results = inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
-    plotting_utils.process_results(results)
+    inference = inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
+    plotting_utils.process_results({'inference' : inference, 'track' : config['test_file']})
