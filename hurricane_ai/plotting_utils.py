@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import simplekml
 from sklearn.preprocessing import RobustScaler
+from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 
 
 def plot_error_loss(predictions: list, observations: list, history: dict, is_scaled: bool, scaler: RobustScaler = None,
@@ -92,7 +93,7 @@ def process_results(results) :
     kml = simplekml.Kml()
     
     
-    for storm in results.values() :
+    for storm in results['inference'].values() :
         for index in range(1, len(storm['lat'])) :
             ax.plot([storm['lon'][index - 1], storm['lon'][index]], [storm['lat'][index - 1], storm['lat'][index]],
                      color='gray', linestyle='--',
@@ -105,7 +106,22 @@ def process_results(results) :
                                coords = [(storm['lon'][index], storm['lat'][index])])
             pnt.timestamp.when = str(storm['times'][index])
             pnt.extendeddata.newdata(name = 'wind', value = storm["wind"][index], displayname = 'Wind Intensity (knots)')
+        
+        # add track
+        data_container = HurricaneDataContainer()
+        data = data_container._parse(results['track'])
+        print(data.head())
+        
+        for index, row in data[['entry_time', 'lat', 'long', 'max_wind', 'min_pressure']].tail(5).iterrows() :
+            pnt = kml.newpoint(name = f'{storm["name"]} history - delta {index}',
+                               description = f'{row["max_wind"]} knots\n' +
+                               f'{row["entry_time"]}\n' +
+                               f'({row["long"]}, {row["lat"]}) (Lon, Lat)',
+                               coords = [(float(row['long'][:-1]) * -1, float(row['lat'][:-1]))]
+                              )
+            pnt.style.iconstyle.color = simplekml.Color.red
             
+        
         kml.save(f'{storm["name"]}.kml')
     
     return
