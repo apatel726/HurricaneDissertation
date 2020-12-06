@@ -88,6 +88,9 @@ def process_results(results) :
     #ax.add_feature(cartopy.feature.RIVERS)
 
     ax.set_global()
+    # open kml object for writing files
+    kml = simplekml.Kml()
+    
     
     for storm in results.values() :
         for index in range(1, len(storm['lat'])) :
@@ -95,5 +98,11 @@ def process_results(results) :
                      color='gray', linestyle='--',
                      transform=ccrs.PlateCarree())
             plt.savefig('test.png', dpi=500)
+            pnt = kml.newpoint(name = f'{storm["name"]} + delta {index}', description = f'{storm["wind"][index]:.2f} knots',
+                                  coords = [(storm['lon'][index], storm['lat'][index])])
+            pnt.timestamp.when = str(storm['times'][index])
+            pnt.extendeddata.newdata(name = 'wind', value = storm["wind"][index], displayname = 'Wind Intensity (knots)')
+            
+        kml.save(f'{storm["name"]}.kml')
     
     return
