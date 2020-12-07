@@ -1,3 +1,4 @@
 .idea*
 *.pyc
+./hurricane_ai/__pycache__/__init__.cpython-36.pyc
 *.ipynb_checkpoints*
