@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import pandas as pd
 from deploy import inference
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 from hurricane_ai.container.hurricane_data_container import Hurricane
@@ -55,5 +56,9 @@ for storm in data.storm_id.unique() :
                     'pressure' : Barometric pressure (mb)
                 }
     '''
+    # generate inference dictionary
     inference = inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
+    # create plotting file, including KML and a PNG ouput with a track
     plotting_utils.process_results({'inference' : inference, 'track' : config['test_file']})
+    # create a CSV for the output
+    pd.DataFrame.from_dict(inference).to_csv(f'inferences.csv')
