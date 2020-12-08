@@ -99,7 +99,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     # Defines the precision of all hurricane measurements
     precision = np.float64
 
-    # Begin at the first (6 hour) lag with lag increments up to 120h inclusive
+    # Begin at the first (6 hour) lag with lag increments up to 30h inclusive
     times = [time * lag for time in
              range(1, (30 // lag) + 1)]
 
