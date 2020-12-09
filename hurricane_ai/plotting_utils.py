@@ -98,7 +98,7 @@ def process_results(results) :
             ax.plot([storm['lon'][index - 1], storm['lon'][index]], [storm['lat'][index - 1], storm['lat'][index]],
                      color='gray', linestyle='--',
                      transform=ccrs.PlateCarree())
-            plt.savefig('test.png', dpi=500)
+            plt.savefig(f'results/{storm["name"]}.png', dpi=300)
             pnt = kml.newpoint(name = f'{storm["name"]} + delta {index}',
                                description = f'{storm["wind"][index]:.2f} knots\n' +
                                f'{storm["times"][index]}\n' +
@@ -122,6 +122,6 @@ def process_results(results) :
             pnt.style.iconstyle.color = simplekml.Color.red
             
         
-        kml.save(f'{storm["name"]}.kml')
+        kml.save(f'results/{storm["name"]}.kml')
     
     return

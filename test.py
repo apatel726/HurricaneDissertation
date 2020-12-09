@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser()
 
 # cli flags for input file
 parser.add_argument('--config', help = 'The file where all the configuration parameters are located', default = None)
+# cli flags for test file
+parser.add_argument('--test', help = 'The test file in HURDAT format to evaluate the models', default = None)
 # cli flags for storm name
 parser.add_argument('--name', help = 'The storm name in the test file to run inference on', default = None)
 # Read in arguements
@@ -24,7 +26,7 @@ with open(args.config) as f :
 
 # TODO: Read in test file from hurricanecontrainer.py
 data_container = HurricaneDataContainer()
-data = data_container._parse(config['test_file'])
+data = data_container._parse(args.test)
 
 # TODO: Pass contents to data_utils for data preparation/feature extraction
 # create hurricane objects for different unique hurricanes
@@ -59,6 +61,6 @@ for storm in data.storm_id.unique() :
     # generate inference dictionary
     inference = inference(config['base_directory'], config['model_file'], config['scaler_file'], hurricanes)
     # create plotting file, including KML and a PNG ouput with a track
-    plotting_utils.process_results({'inference' : inference, 'track' : config['test_file']})
+    plotting_utils.process_results({'inference' : inference, 'track' : args.test})
     # create a CSV for the output
-    pd.DataFrame.from_dict(inference).to_csv(f'inferences.csv')
+    pd.DataFrame.from_dict(inference).to_csv(f'results/inferences.csv')
