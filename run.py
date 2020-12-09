@@ -18,15 +18,6 @@ def log(message) :
     '''
     print(f'[{datetime.datetime.utcnow().isoformat()}Z] [HURAIM] {message}')
 
-log('Creating scaled dataset')
-scaled_train_val_data, feature_scaler = data_utils.build_scaled_ml_dataset(timesteps=5)
-
-log('Creating our training and validation data structure')
-X_train, X_val, y_train, y_val = model_selection.train_test_split(scaled_train_val_data['x'],
-                                                                  scaled_train_val_data['y'],
-                                                                  test_size=0.2,
-                                                                  random_state=123)
-
 '''
 Model Command Line Arguments
 ----------------------------
@@ -71,6 +62,16 @@ parser.add_argument("--optimizer", help = "The optimizer hyperparameter", defaul
 args = parser.parse_args()
 log(str(args))
 
+
+log('Creating scaled dataset')
+scaled_train_val_data, feature_scaler = data_utils.build_scaled_ml_dataset(timesteps=5, load=args.load)
+
+log('Creating our training and validation data structure')
+X_train, X_val, y_train, y_val = model_selection.train_test_split(scaled_train_val_data['x'],
+                                                                  scaled_train_val_data['y'],
+                                                                  test_size=0.2,
+                                                                  random_state=123)
+
 def singular() :
     global y_train, y_val, X_train, X_val, args, feature_scaler
     # Wind intensity train/test features
@@ -84,33 +85,38 @@ def singular() :
     y_val_lon = data_utils.subset_features(y_val, 1)
     
     # Create and train bidirectional LSTM models for wind speed and track in isolation
+    directory = f'singular_{datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")}/'
     
     log('Create and train bidirectional LSTM wind model')
     bidir_lstm_model_wind = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'wind', feature_scaler,
                                                            dropout = args.dropout, loss = args.loss,
                                                            optimizer = args.optimizer, args = args)
     bidir_lstm_model_wind_hist = bidir_lstm_model_wind.train(X_train, y_train_wind, X_val, y_val_wind,
-                                                             load_if_exists=args.load, epochs=args.epochs)
+                                                             load_if_exists=args.load, epochs=args.epochs,
+                                                             directory = directory)
 
     
-    log('Create and train bidirectional LSTM track model')
+    log('Create and train bidirectional LSTM lat model')
     bidir_lstm_model_lat = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lat', feature_scaler,
                                                           dropout=args.dropout, loss=args.loss,
                                                           optimizer=args.optimizer, args=args)
     bidir_lstm_model_lat_hist = bidir_lstm_model_lat.train(X_train, y_train_lat, X_val, y_val_lat,
-                                                           load_if_exists=args.load, epochs=args.epochs)
-
+                                                           load_if_exists=args.load, epochs=args.epochs,
+                                                             directory = directory)
+    
+    log('Create and train bidirectional LSTM lon model')
     bidir_lstm_model_lon = BidrectionalLstmHurricaneModel((X_train.shape[1], X_train.shape[2]), 'lon', feature_scaler,
                                                           dropout=args.dropout, loss=args.loss,
                                                           optimizer=args.optimizer, args=args)
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, X_val, y_val_lon,
-                                                           load_if_exists=args.load, epochs=args.epochs)
+                                                           load_if_exists=args.load, epochs=args.epochs,
+                                                             directory = directory)
     
     return {
-            'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
-            'lat' : (bidir_lstm_model_lat, bidir_lstm_model_lat_hist),
-            'lon' : (bidir_lstm_model_lon, bidir_lstm_model_lon_hist)
-        }
+        'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),
+        'lat' : (bidir_lstm_model_lat, bidir_lstm_model_lat_hist),
+        'lon' : (bidir_lstm_model_lon, bidir_lstm_model_lon_hist)
+    }
             
 
 def universal() :

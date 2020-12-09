@@ -1,4 +1,4 @@
-import datetime
+from datetime import timedelta
 import os
 import pickle as pkl
 from os import path
@@ -22,7 +22,8 @@ def subset_features(data, feature_idx: int) -> np.array:
     return np.array([[[features[feature_idx]] for features in y] for y in data], dtype=np.float64)
 
 
-def build_scaled_ml_dataset(timesteps=5, remove_missing=True, train_test_data: dict = None) -> (dict, RobustScaler):
+def build_scaled_ml_dataset(timesteps=5, remove_missing=True, train_test_data: dict = None,
+                           load=True) -> (dict, RobustScaler):
     """
     PURPOSE: Scale our data using the RobustScaler method from the sklearn library
     METHOD: Generate data using 1 timesteps and then remove the NaN or None types to use the scaler methods
@@ -30,12 +31,13 @@ def build_scaled_ml_dataset(timesteps=5, remove_missing=True, train_test_data: d
     :param timesteps: Number of timesteps for the dataset (defaults to 1)
     :param remove_missing: Boolean indicating whether the algorithm will disregard missing values
     :param train_test_data: Unscaled training/testing dataset (optional)
+    :param load: Loads the currently saved training and test data
     :return: 1) Scaled processed_data using RobustScaler
              2) RobustScaler object fit with appropriate data
     """
 
     # Load the scaled train/test data and the scaler if they exists and are not stale
-    if path.exists(TRAIN_TEST_NPZ_FILE) and path.exists(SCALER_FILE) and not is_source_modified(
+    if load and path.exists(TRAIN_TEST_NPZ_FILE) and path.exists(SCALER_FILE) and not is_source_modified(
             HURRICANE_SOURCE_FILE, TRAIN_TEST_NPZ_FILE):
         # Load serialized scaled data
         data = np.load(TRAIN_TEST_NPZ_FILE)
@@ -152,20 +154,30 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
 
     :param storm: Hurricane object
     :param timesteps: Number of timesteps to calculate (default = 1)
-    :param lag: Lag in hours for the dependent variables up to 5 days (default = 24)
+    :param lag: Lag in hours for the dependent variables up to 5 times the lag (default = 6)
     :return: Dictionary with independent (x) and dependent (y) values.
     """
 
     x = []
     # Create testing data structure with a dictionary
-    times = [time * lag for time in
-             range(1, (30 // lag) + 1)]  # Begin at lag hours with lag increments up to 120h inclusive
+    times = [time * lag for time in range(1, (30 // lag) + 1)]
     y = dict([(time, []) for time in times])
 
     # Sort by entry time
     entries = [entry[1] for entry in sorted(storm.entries.items())]
-
-    for index in range(1, len(entries)): # start at 1 because we need a previous entry to calculate some features
+    
+    # start at 1 because we need a previous entry to calculate some features
+    for index in range(1, len(entries) - 1):
+        entry_time = entries[index]['entry_time']
+        
+        # Check to see if we have valid future entries
+        if None in [storm.entries.get(entry_time + timedelta(hours = future)) for future in times] :
+            # if it's not just because we're running out of entries, skip
+            if len(entries) > (index + timesteps) :
+                print(f"{storm.name} at {entry_time} does not follow expected pattern at " \
+                      f"{timesteps} timesteps with {lag} hours in the future")
+                continue
+        
         # Calculate time steps and their features for independent values
         sample = []
         for step in range(timesteps):
@@ -175,11 +187,11 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
             # placeholder if there is not enough history
             sample.append([timestep['entry_time']] + [[_extract_features(timestep, previous, placeholders = (step > index))]])
         x.append(sample)  # Add our constructed sample
-
+            
         # Calculate time steps and their features for dependent values
         for future in times:
-            timestep = storm.entries.get(entries[index]['entry_time'] + datetime.timedelta(hours=future))
-            previous = storm.entries.get(entries[index]['entry_time'] + datetime.timedelta(hours=future - lag))
+            timestep = storm.entries.get(entry_time + timedelta(hours=future))
+            previous = storm.entries.get(entry_time + timedelta(hours=future - lag))
             
             # timestep and previous might be None because of insuficcient data. Placeholders will be used.
             y[future].append(_extract_features(timestep, previous, placeholders = (timestep is None)))
@@ -210,8 +222,9 @@ def _extract_features(timestep, previous, placeholders = False):
     :return: Dictionary of features
     """
     
+    # Handle some special cases
     # Placeholder values. Reference features variable for real data input
-    placeholder_value = -999999999
+    placeholder_value = -999
     if placeholders :
         return {feature : placeholder_value for feature in ['lat', 'long', 'max_wind', 'delta_wind',
                                                            'min_pressure', 'zonal_speed', 'meridonal_speed',

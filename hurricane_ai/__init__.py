@@ -36,7 +36,7 @@ def is_source_modified(source_file, processed_file):
 
 def save(model, history, timestamp, prefix, args, scaler) :
     '''
-    Uses HDF5 to save a directory for the models and a CSV for the history
+    Uses SavedModel to save a directory for the models and a CSV for the history
     
     Parameters
     ----------

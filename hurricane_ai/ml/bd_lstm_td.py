@@ -83,6 +83,10 @@ class BidrectionalLstmHurricaneModel:
         """
         Build and compile the model architecture.
         :return: The compiled model architecture.
+        
+            Note :
+                tf.keras.metrics.MeanAbsoluteError() and 
+                tf.keras.metrics.MeanAbsolutePercentageError() are available metrics
         """
 
         model = Sequential()
@@ -92,13 +96,12 @@ class BidrectionalLstmHurricaneModel:
             model.add(TimeDistributed(Dense(1)))
         elif self.mode == 'universal' :
             model.add(TimeDistributed(Dense(3)))
-        model.compile(loss=self.loss, optimizer=self.optimizer, metrics = [tf.keras.metrics.MeanAbsoluteError(),
-                                                                          tf.keras.metrics.MeanAbsolutePercentageError()])
+        model.compile(loss=self.loss, optimizer=self.optimizer)
 
         return model
 
     def train(self, X_train, y_train, X_val, y_val, batch_size=5000, epochs=50, load_if_exists=True,
-              verbose=True) -> Dict:
+              verbose=2, directory = '') -> Dict:
         """
         Train the model using the given dataset and parameters.
         :param X_train: The training dataset observations.
@@ -109,6 +112,8 @@ class BidrectionalLstmHurricaneModel:
         :param epochs: The number of epochs.
         :param load_if_exists: Indicates whether model should be loaded from disk if it exists.
         :param verbose: Indicates whether to use verbose output during training.
+            0, 1, or 2. Verbosity mode. 0 = silent, 1 = progress bar, 2 = one line per epoch
+        :param directory: Additional directory path after 'hurricane_ai/models'
         :return: The training history.
         """
 
@@ -128,7 +133,7 @@ class BidrectionalLstmHurricaneModel:
 
         # create model directory
         timestamp = datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")
-        prefix = 'hurricane_ai/models/'
+        prefix = f'hurricane_ai/models/{directory}'
         logs = tf.keras.callbacks.TensorBoard(log_dir = f'{prefix}{timestamp}/', histogram_freq = 1,
                                               profile_batch = 0)
         
