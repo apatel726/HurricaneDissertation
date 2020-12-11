@@ -63,4 +63,4 @@ for storm in data.storm_id.unique() :
     # create plotting file, including KML and a PNG ouput with a track
     plotting_utils.process_results({'inference' : inference, 'track' : args.test})
     # create a CSV for the output
-    pd.DataFrame.from_dict(inference).to_csv(f'results/inferences.csv')
+    pd.DataFrame.from_dict(inference).to_csv(f'results/inferences_{datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")}.csv')

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="1">
+        <Style id="24">
+            <IconStyle id="25">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="26">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="29">
+            <IconStyle id="30">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="31">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="34">
+            <IconStyle id="35">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="36">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="39">
+            <IconStyle id="40">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="41">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="44">
+            <IconStyle id="45">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="46">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Placemark id="3">
+            <name>AL092017 + delta 1</name>
+            <description>34.08 knots
+2017-08-25 00:00:00+00:00
+(-95.90645685195922, 28.732028533518317) (Lon, Lat)</description>
+            <TimeStamp id="4">
+                <when>2017-08-25 00:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>34.08233821392059</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="2">
+                <coordinates>-95.90645685195922,28.732028533518317,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="8">
+            <name>AL092017 + delta 2</name>
+            <description>22.00 knots
+2017-08-25 06:00:00+00:00
+(-96.31387224197387, 27.54385826289654) (Lon, Lat)</description>
+            <TimeStamp id="9">
+                <when>2017-08-25 06:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>21.995059847831726</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="7">
+                <coordinates>-96.31387224197387,27.54385826289654,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="13">
+            <name>AL092017 + delta 3</name>
+            <description>11.20 knots
+2017-08-25 12:00:00+00:00
+(-92.04027671813964, 23.045368830859662) (Lon, Lat)</description>
+            <TimeStamp id="14">
+                <when>2017-08-25 12:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>11.200672388076782</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="12">
+                <coordinates>-92.04027671813964,23.045368830859662,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="18">
+            <name>AL092017 + delta 4</name>
+            <description>6.44 knots
+2017-08-25 18:00:00+00:00
+(-79.27339067459106, 18.334974145889284) (Lon, Lat)</description>
+            <TimeStamp id="19">
+                <when>2017-08-25 18:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>6.440795660018921</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="17">
+                <coordinates>-79.27339067459106,18.334974145889284,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="23">
+            <name>AL092017 history - delta 31</name>
+            <description>30 knots
+2017-08-23 12:00:00
+(92.3W, 21.4N) (Lon, Lat)</description>
+            <styleUrl>#24</styleUrl>
+            <Point id="22">
+                <coordinates>-92.3,21.4,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="28">
+            <name>AL092017 history - delta 32</name>
+            <description>35 knots
+2017-08-23 18:00:00
+(92.4W, 21.6N) (Lon, Lat)</description>
+            <styleUrl>#29</styleUrl>
+            <Point id="27">
+                <coordinates>-92.4,21.6,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="33">
+            <name>AL092017 history - delta 33</name>
+            <description>40 knots
+2017-08-24 00:00:00
+(92.5W, 22.0N) (Lon, Lat)</description>
+            <styleUrl>#34</styleUrl>
+            <Point id="32">
+                <coordinates>-92.5,22.0,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="38">
+            <name>AL092017 history - delta 34</name>
+            <description>50 knots
+2017-08-24 06:00:00
+(92.6W, 22.8N) (Lon, Lat)</description>
+            <styleUrl>#39</styleUrl>
+            <Point id="37">
+                <coordinates>-92.6,22.8,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="43">
+            <name>AL092017 history - delta 35</name>
+            <description>60 knots
+2017-08-24 12:00:00
+(93.1W, 23.7N) (Lon, Lat)</description>
+            <styleUrl>#44</styleUrl>
+            <Point id="42">
+                <coordinates>-93.1,23.7,0.0</coordinates>
+            </Point>
+        </Placemark>
+    </Document>
+</kml>

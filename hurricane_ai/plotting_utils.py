@@ -94,7 +94,7 @@ def process_results(results) :
     
     
     for storm in results['inference'].values() :
-        for index in range(1, len(storm['lat'])) :
+        for index in range(len(storm['lat'])) :
             ax.plot([storm['lon'][index - 1], storm['lon'][index]], [storm['lat'][index - 1], storm['lat'][index]],
                      color='gray', linestyle='--',
                      transform=ccrs.PlateCarree())

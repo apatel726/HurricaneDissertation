@@ -39,7 +39,7 @@ class LstmHurricaneModel:
         """
 
         model = Sequential()
-        model.add(LSTM(units=1024, input_shape=self.input_shape, return_sequences=True, dropout = self.dropout))
+        model.add(LSTM(units=512, return_sequences=True, dropout=self.dropout), input_shape=self.input_shape)
         model.add(TimeDistributed(Dense(1)))
         model.compile(loss=self.loss, optimizer=self.optimizer)
 

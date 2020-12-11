@@ -64,7 +64,7 @@ def build_scaled_ml_dataset(timesteps=5, remove_missing=True, train_test_data: d
     train_test_data = build_ml_dataset(timesteps, remove_missing) if train_test_data is None else train_test_data
 
     # Scale our data
-    for index in range(len(train_test_data['x'])):
+    for index in range(len(train_test_data['x'])) :
         # Scale our training dataset
         train_test_data['x'][index] = feature_scaler.transform(train_test_data['x'][index])
         # Scale our testing dataset
@@ -157,7 +157,8 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
     :param lag: Lag in hours for the dependent variables up to 5 times the lag (default = 6)
     :return: Dictionary with independent (x) and dependent (y) values.
     """
-
+    placeholders = False
+    
     x = []
     # Create testing data structure with a dictionary
     times = [time * lag for time in range(1, (30 // lag) + 1)]
@@ -167,17 +168,20 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
     entries = [entry[1] for entry in sorted(storm.entries.items())]
     
     # start at 1 because we need a previous entry to calculate some features
-    for index in range(1, len(entries) - 1):
+    for index in range(1 if placeholders else 4, len(entries) - 1) :
         entry_time = entries[index]['entry_time']
         
         # Check to see if we have valid future entries
         if None in [storm.entries.get(entry_time + timedelta(hours = future)) for future in times] :
+            if not placeholders : break
             # if it's not just because we're running out of entries, skip
             if len(entries) > (index + timesteps) :
-                print(f"{storm.name} at {entry_time} does not follow expected pattern at " \
-                      f"{timesteps} timesteps with {lag} hours in the future")
+                if timesteps != 1 :
+                    print(f"{storm.name} at {entry_time} does not follow expected pattern at " \
+                          f"{timesteps} timesteps with {lag} hours in the future")
                 continue
-        
+                
+            
         # Calculate time steps and their features for independent values
         sample = []
         for step in range(timesteps):
@@ -224,7 +228,7 @@ def _extract_features(timestep, previous, placeholders = False):
     
     # Handle some special cases
     # Placeholder values. Reference features variable for real data input
-    placeholder_value = -999
+    placeholder_value = 0
     if placeholders :
         return {feature : placeholder_value for feature in ['lat', 'long', 'max_wind', 'delta_wind',
                                                            'min_pressure', 'zonal_speed', 'meridonal_speed',

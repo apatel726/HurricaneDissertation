@@ -66,7 +66,7 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
     for storm in storms:
         print(f"Running inference for {storm['storm']}")
         # Build data frame with raw observations and derived features
-        df = prep_hurricane_data(storm["entries"], lag)
+        df = prep_hurricane_data(storm["entries"], 1)
         
         if (len(storm["entries"])) <= 5 : # 1 entry = 6 hours 
             print(f'{storm["storm"]} does not have enough data (minimum 5 days)')
@@ -111,19 +111,21 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         elif not model_type == "universal" :
             for increment in range(5) : # 5 (6hour) increments
                 if model_type == "wind" :
-                    wind_result = []
-                    wind_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[increment]))
-                    print(f'{(increment+1) * 6} hours: singular result wind test:{scaler.inverse_transform(wind_result)[0][2]}')
-                
+                    wind_result = scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[increment])])[0][2]
+                    print(f'{(increment+1) * 6} hours: universal result wind test:{wind_result}')
+                    wind_results.append(wind_result)
                 elif model_type == "lat" : 
-                    lat_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[increment]))
-                    print(f'{(increment+1) * 6} hours: singular result lat test:{scaler.inverse_transform(lat_result)[0][0]}')
-                
+                    lat_result = scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[increment])])[0][0]
+                    lat_results.append(lat_result)
+                    print(f'{(increment+1) * 6} hours: universal result lat test:{lat_result}')
                 else:
                     model = "long"
-                    long_result = []
-                    long_result.append(hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[increment]))
-                    print(f'{(increment+1) * 6} hours: singular result long test:{scaler.inverse_transform(long_result)[0][1]}')
+                    long_result = -1 * scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[increment])])[0][1]
+                    lon_results.append(long_result)
+                    print(f'{(increment+1) * 6} hours: universal result long test:{long_result}')
         else :
             print('Unknown type of model or not yet configured')
         
