@@ -1,5 +1,8 @@
 {
     "base_directory": "/tf/HurricaneDissertation/hurricane_ai/models/2020_12_11_04_40", 
     "model_file": "model_2020_12_11_04_40",
-    "scaler_file": "feature_scaler.pkl"
+    "scaler_file": "feature_scaler.pkl",
+    "all_timesteps" : {
+        "placeholders" : false
+    }
 }

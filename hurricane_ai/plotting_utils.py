@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import simplekml
 from sklearn.preprocessing import RobustScaler
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
-
+import cartopy
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
 
 def plot_error_loss(predictions: list, observations: list, history: dict, is_scaled: bool, scaler: RobustScaler = None,
                     var_index: int = None) -> plt:
@@ -74,31 +76,28 @@ def _generate_sparse_feature_vector(vector_length: int, feature_index: int, feat
 
     return features
 
-def process_results(results) :
-    import cartopy
-    import cartopy.crs as ccrs
-    import matplotlib.pyplot as plt
-    
-    ax = plt.axes(projection=cartopy.crs.PlateCarree())
-
-    ax.add_feature(cartopy.feature.LAND)
-    ax.add_feature(cartopy.feature.OCEAN)
-    ax.add_feature(cartopy.feature.COASTLINE)
-    #ax.add_feature(cartopy.feature.BORDERS, linestyle=':')
-    #ax.add_feature(cartopy.feature.LAKES, alpha=0.5)
-    #ax.add_feature(cartopy.feature.RIVERS)
-
-    ax.set_global()
-    # open kml object for writing files
-    kml = simplekml.Kml()
-    
-    
+def process_results(results, postfix = '') :   
     for storm in results['inference'].values() :
+        plt.figure(f"{storm['name']}{postfix}")
+        ax = plt.axes(projection=cartopy.crs.PlateCarree())
+
+        ax.add_feature(cartopy.feature.LAND)
+        ax.add_feature(cartopy.feature.OCEAN)
+        ax.add_feature(cartopy.feature.COASTLINE)
+        #ax.add_feature(cartopy.feature.BORDERS, linestyle=':')
+        #ax.add_feature(cartopy.feature.LAKES, alpha=0.5)
+        #ax.add_feature(cartopy.feature.RIVERS)
+
+        ax.set_global()
+        # open kml object for writing files
+        kml = simplekml.Kml()
         for index in range(len(storm['lat'])) :
+            # process PNG
             ax.plot([storm['lon'][index - 1], storm['lon'][index]], [storm['lat'][index - 1], storm['lat'][index]],
                      color='gray', linestyle='--',
                      transform=ccrs.PlateCarree())
-            plt.savefig(f'results/{storm["name"]}.png', dpi=300)
+            
+            # process KML
             pnt = kml.newpoint(name = f'{storm["name"]} + delta {index}',
                                description = f'{storm["wind"][index]:.2f} knots\n' +
                                f'{storm["times"][index]}\n' +
@@ -112,7 +111,7 @@ def process_results(results) :
         data = data_container._parse(results['track'])
         print(data.head())
         
-        for index, row in data[['entry_time', 'lat', 'long', 'max_wind', 'min_pressure']].tail(5).iterrows() :
+        for index, row in data[['entry_time', 'lat', 'long', 'max_wind', 'min_pressure']].iterrows() :
             pnt = kml.newpoint(name = f'{storm["name"]} history - delta {index}',
                                description = f'{row["max_wind"]} knots\n' +
                                f'{row["entry_time"]}\n' +
@@ -121,7 +120,8 @@ def process_results(results) :
                               )
             pnt.style.iconstyle.color = simplekml.Color.red
             
-        
-        kml.save(f'results/{storm["name"]}.kml')
+        # save results
+        kml.save(f'results/{storm["name"]}{postfix}.kml')
+        plt.savefig(f'results/{storm["name"]}{postfix}.png', dpi=300)
     
     return
