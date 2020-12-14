@@ -48,6 +48,58 @@ def parse_entries(entries, storm) :
         'storm' : storm
     }]
 
+def create_table(prediction, storm) : 
+    '''
+    Creates an output table meant for CSV export
+    
+    Args:
+        prediction (list(dict)) : The predictions in dict of form,
+        'storm_id' : {
+            'name' : String,
+            'times' : list(Datetime),
+            'wind' : list(float),
+            'lat' : list(float),
+            'lon' : list(float)
+        }
+    '''
+    results = []
+    for index, time in enumerate(prediction[storm.id]['times']) : 
+        time = time.replace(tzinfo=None)
+        if time in storm.entries.keys() :
+            truth_entry = storm.entries[time]
+            results.append({'WindTruth' : truth_entry['max_wind'],
+                        'LatTruth' : truth_entry['lat'],
+                        'LonTruth' : truth_entry['long'] * -1,
+                        'Mpredict_Wind' : prediction[storm.id]['wind'][index],
+                        'Mpredict_Lat' : prediction[storm.id]['lat'][index],
+                        'Mpredict_Lon' : prediction[storm.id]['lon'][index],
+                        'Upredict_Wind' : 'TODO',
+                        'Upredict_Lat' : 'TODO',
+                        'Upredict_Lon' : 'TODO',
+                        'Mdiff_Wind' : truth_entry['max_wind'] - prediction[storm.id]['wind'][index],
+                        'Mdiff_Lat' : truth_entry['lat'] - prediction[storm.id]['lat'][index],
+                        'Mdiff_Lon' : (truth_entry['long'] * -1) - prediction[storm.id]['lon'][index],
+                        'Udiff_Wind' : 'TODO',
+                        'Udiff_Lat' : 'TODO',
+                        'Udiff_Lon' : 'TODO'})
+        else :
+            results.append({'WindTruth' : 'N/A',
+                        'LatTruth' : 'N/A',
+                        'LonTruth' : 'N/A',
+                        'Mpredict_Wind' : prediction[storm.id]['wind'][index],
+                        'Mpredict_Lat' : prediction[storm.id]['lat'][index],
+                        'Mpredict_Lon' : prediction[storm.id]['lon'][index],
+                        'Upredict_Wind' : 'TODO',
+                        'Upredict_Lat' : 'TODO',
+                        'Upredict_Lon' : 'TODO',
+                        'Mdiff_Wind' : 'N/A',
+                        'Mdiff_Lat' : 'N/A',
+                        'Mdiff_Lon' : 'N/A',
+                        'Udiff_Wind' : 'TODO',
+                        'Udiff_Lat' : 'TODO',
+                        'Udiff_Lon' : 'TODO'})
+    return results
+
 # TODO: Pass contents to data_utils for data preparation/feature extraction
 # create hurricane objects for different unique hurricanes
 for storm in data.storm_id.unique() :
@@ -64,22 +116,24 @@ for storm in data.storm_id.unique() :
         buffer = 1 if config["all_timesteps"]['placeholders'] else 5 # buffer determines start and end index
         inferences = []
         for index in range(buffer, len(hurricane.entries))  :
-            inferences.append(inference(config['base_directory'],
+            prediction = inference(config['base_directory'],
                                    config['model_file'],
                                    config['scaler_file'],
-                                   parse_entries({time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]}, storm)))
+                                   parse_entries({time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]}, storm))
+            inferences.append(prediction)
             # create plotting file, including KML and a PNG ouput with a track
             plotting_utils.process_results({
-                'inference' : inferences[-1],
+                'inference' : prediction,
                 'track' : args.test
             },
             postfix = f"_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
-        # save to csv
-        pd.DataFrame.from_dict(inferences).to_csv(f'results/inferences_{datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")}.csv')
+            # save to csv
+            pd.DataFrame.from_dict(create_table(prediction,hurricane)
+                                  ).to_csv(f"results/inferences_{storm}_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}.csv")
     else :
         # generate inference dictionary
-        inferences = inference(config['base_directory'], config['model_file'], config['scaler_file'], parse_entries(hurricane.entires, storm))
+        inferences = inference(config['base_directory'], config['model_file'], config['scaler_file'], parse_entries(hurricane.entries, storm))
         # create plotting file, including KML and a PNG ouput with a track
         plotting_utils.process_results({'inference' : inferences, 'track' : args.test})
         # create a CSV for the output
-        pd.DataFrame.from_dict(inferences).to_csv(f'results/inferences_{datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")}.csv')
+        pd.DataFrame.from_dict(create_table(inferences,hurricane)).to_csv(f'results/inferences_{[* hurricane.entries][-1].strftime("%Y_%m_%d_%H_%M")}.csv')

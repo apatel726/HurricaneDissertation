@@ -27,7 +27,17 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
     :param base_directory: Path to directory containing serialized artifacts (e.g. models, scalers).
     :param model_file: Filename of the model file.
     :param scaler_file: Filename of the scaler file.
-    :param file_type: String, either "test" or "live"
+    :param file_type: String or a list of entry objects. String can be value "live". List of dict objects
+        in the form, 
+        [{ 'entries' : [{
+            'time' : Datetime,
+            'wind' : float,
+            'lat' : float,
+            'lon' : float,
+            'pressure' : float
+        } for time in entries],
+        'storm' : storm
+        }]
     """
     # load current model configuration
     with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
