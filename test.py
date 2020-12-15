@@ -48,7 +48,7 @@ def parse_entries(entries, storm) :
         'storm' : storm
     }]
 
-def create_table(prediction, storm) : 
+def create_table(prediction, storm, delta = 6) : 
     '''
     Creates an output table meant for CSV export
     
@@ -63,41 +63,40 @@ def create_table(prediction, storm) :
         }
     '''
     results = []
-    for index, time in enumerate(prediction[storm.id]['times']) : 
+    for index, time in enumerate(prediction['universal'][storm.id]['times']) : 
         time = time.replace(tzinfo=None)
+        result = {
+            'time' : time,
+            'delta' : delta * (index + 1),
+            'Mpredict_Wind' : prediction['universal'][storm.id]['wind'][index],
+            'Mpredict_Lat' : prediction['universal'][storm.id]['lat'][index],
+            'Mpredict_Lon' : prediction['universal'][storm.id]['lon'][index],
+            'Upredict_Wind' : prediction['singular'][storm.id]['wind'][index],
+            'Upredict_Lat' : prediction['singular'][storm.id]['lat'][index],
+            'Upredict_Lon' : prediction['singular'][storm.id]['lon'][index]
+        }
         if time in storm.entries.keys() :
             truth_entry = storm.entries[time]
-            results.append({'WindTruth' : truth_entry['max_wind'],
+            result.update({'WindTruth' : truth_entry['max_wind'],
                         'LatTruth' : truth_entry['lat'],
                         'LonTruth' : truth_entry['long'] * -1,
-                        'Mpredict_Wind' : prediction[storm.id]['wind'][index],
-                        'Mpredict_Lat' : prediction[storm.id]['lat'][index],
-                        'Mpredict_Lon' : prediction[storm.id]['lon'][index],
-                        'Upredict_Wind' : 'TODO',
-                        'Upredict_Lat' : 'TODO',
-                        'Upredict_Lon' : 'TODO',
-                        'Mdiff_Wind' : truth_entry['max_wind'] - prediction[storm.id]['wind'][index],
-                        'Mdiff_Lat' : truth_entry['lat'] - prediction[storm.id]['lat'][index],
-                        'Mdiff_Lon' : (truth_entry['long'] * -1) - prediction[storm.id]['lon'][index],
-                        'Udiff_Wind' : 'TODO',
-                        'Udiff_Lat' : 'TODO',
-                        'Udiff_Lon' : 'TODO'})
+                        'Mdiff_Wind' : truth_entry['max_wind'] - prediction['universal'][storm.id]['wind'][index],
+                        'Mdiff_Lat' : truth_entry['lat'] - prediction['universal'][storm.id]['lat'][index],
+                        'Mdiff_Lon' : (truth_entry['long'] * -1) - prediction['universal'][storm.id]['lon'][index],
+                        'Udiff_Wind' : truth_entry['max_wind'] - prediction['singular'][storm.id]['wind'][index],
+                        'Udiff_Lat' : truth_entry['lat'] - prediction['singular'][storm.id]['lat'][index],
+                        'Udiff_Lon' : (truth_entry['long'] * -1) - prediction['singular'][storm.id]['lon'][index]})
         else :
-            results.append({'WindTruth' : 'N/A',
+            result.update({'WindTruth' : 'N/A',
                         'LatTruth' : 'N/A',
                         'LonTruth' : 'N/A',
-                        'Mpredict_Wind' : prediction[storm.id]['wind'][index],
-                        'Mpredict_Lat' : prediction[storm.id]['lat'][index],
-                        'Mpredict_Lon' : prediction[storm.id]['lon'][index],
-                        'Upredict_Wind' : 'TODO',
-                        'Upredict_Lat' : 'TODO',
-                        'Upredict_Lon' : 'TODO',
                         'Mdiff_Wind' : 'N/A',
                         'Mdiff_Lat' : 'N/A',
                         'Mdiff_Lon' : 'N/A',
-                        'Udiff_Wind' : 'TODO',
-                        'Udiff_Lat' : 'TODO',
-                        'Udiff_Lon' : 'TODO'})
+                        'Udiff_Wind' : 'N/A',
+                        'Udiff_Lat' : 'N/A',
+                        'Udiff_Lon' : 'N/A'})
+        results.append(result)
     return results
 
 # TODO: Pass contents to data_utils for data preparation/feature extraction
@@ -116,24 +115,53 @@ for storm in data.storm_id.unique() :
         buffer = 1 if config["all_timesteps"]['placeholders'] else 5 # buffer determines start and end index
         inferences = []
         for index in range(buffer, len(hurricane.entries))  :
-            prediction = inference(config['base_directory'],
+            prediction = {
+                'universal' : inference(config['base_directory'],
                                    config['model_file'],
                                    config['scaler_file'],
-                                   parse_entries({time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]}, storm))
+                                   parse_entries({
+                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
+                                   }, storm)),
+                'singular' : inference(config['univariate']['base_directory'],
+                                   None,
+                                   None,
+                                   parse_entries({
+                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
+                                   }, storm)) if 'univariate' in config.keys() else None
+            }
             inferences.append(prediction)
             # create plotting file, including KML and a PNG ouput with a track
             plotting_utils.process_results({
-                'inference' : prediction,
-                'track' : args.test
-            },
-            postfix = f"_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
+                    'inference' : prediction['universal'],
+                    'track' : args.test
+                },
+                postfix = f"universal_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
+            if prediction['singular'] :
+                plotting_utils.process_results({
+                    'inference' : prediction['singular'],
+                    'track' : args.test
+                },
+                postfix = f"singular_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
+            
             # save to csv
             pd.DataFrame.from_dict(create_table(prediction,hurricane)
                                   ).to_csv(f"results/inferences_{storm}_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}.csv")
     else :
         # generate inference dictionary
-        inferences = inference(config['base_directory'], config['model_file'], config['scaler_file'], parse_entries(hurricane.entries, storm))
+        inferences = {
+            'universal' : inference(config['base_directory'],
+                               config['model_file'],
+                               config['scaler_file'],
+                               parse_entries(hurricane.entries, storm)),
+            'singular' : inference(config['univariate']['base_directory'],
+                               None,
+                               config['univariate']['scaler_file'],
+                               parse_entries(hurricane.entries, storm)) if 'univariate' in config.keys() else None
+        }
         # create plotting file, including KML and a PNG ouput with a track
-        plotting_utils.process_results({'inference' : inferences, 'track' : args.test})
+        plotting_utils.process_results({'inference' : inferences['universal'], 'track' : args.test}, postfix = 'universal')
+        if inferences['singular'] :
+            plotting_utils.process_results({'inference' : inferences['singular'], 'track' : args.test}, postfix = 'singular')
         # create a CSV for the output
-        pd.DataFrame.from_dict(create_table(inferences,hurricane)).to_csv(f'results/inferences_{[* hurricane.entries][-1].strftime("%Y_%m_%d_%H_%M")}.csv')
+        pd.DataFrame.from_dict(create_table(inferences,hurricane)
+                              ).to_csv(f'results/inferences_{[* hurricane.entries][-1].strftime("%Y_%m_%d_%H_%M")}.csv')

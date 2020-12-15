@@ -4,5 +4,8 @@
     "scaler_file": "feature_scaler.pkl",
     "all_timesteps" : {
         "placeholders" : false
+    },
+    "univariate" : {
+        "base_directory" : "/tf/HurricaneDissertation/hurricane_ai/models/singular_2020_12_15_01_08"
     }
 }
