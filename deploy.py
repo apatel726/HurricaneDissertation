@@ -161,6 +161,8 @@ def inference(base_directory: str, model_file: str, scaler_file: str, file_type 
         }
         pp.pprint(results)
     
+    del model
+    
     return results
 if __name__ == "__main__" :
     fire.Fire(inference)

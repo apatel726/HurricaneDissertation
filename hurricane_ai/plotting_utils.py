@@ -123,5 +123,4 @@ def process_results(results, postfix = '') :
         # save results
         kml.save(f'results/{storm["name"]}{postfix}.kml')
         plt.savefig(f'results/{storm["name"]}{postfix}.png', dpi=300)
-    
-    return
+        plt.close('all')

@@ -2,6 +2,7 @@ import argparse
 import datetime
 import json
 import pandas as pd
+import tensorflow as tf
 from deploy import inference
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 from hurricane_ai.container.hurricane_data_container import Hurricane
@@ -129,6 +130,7 @@ for storm in data.storm_id.unique() :
                                        time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
                                    }, storm)) if 'univariate' in config.keys() else None
             }
+            tf.keras.backend.clear_session()
             inferences.append(prediction)
             # create plotting file, including KML and a PNG ouput with a track
             plotting_utils.process_results({
