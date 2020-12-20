@@ -121,6 +121,6 @@ def process_results(results, postfix = '') :
             pnt.style.iconstyle.color = simplekml.Color.red
             
         # save results
-        kml.save(f'results/{storm["name"]}{postfix}.kml')
-        plt.savefig(f'results/{storm["name"]}{postfix}.png', dpi=300)
+        kml.save(f'results/{postfix}.kml')
+        plt.savefig(f'results/{postfix}.png', dpi=300)
         plt.close('all')

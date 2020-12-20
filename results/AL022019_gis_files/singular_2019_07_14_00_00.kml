@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="3193">
+        <Style id="3221">
+            <IconStyle id="3222">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3223">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3226">
+            <IconStyle id="3227">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3228">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3231">
+            <IconStyle id="3232">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3233">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3236">
+            <IconStyle id="3237">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3238">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3241">
+            <IconStyle id="3242">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3243">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3246">
+            <IconStyle id="3247">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3248">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3251">
+            <IconStyle id="3252">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3253">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3256">
+            <IconStyle id="3257">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3258">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3261">
+            <IconStyle id="3262">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3263">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3266">
+            <IconStyle id="3267">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3268">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3271">
+            <IconStyle id="3272">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3273">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3276">
+            <IconStyle id="3277">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3278">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3281">
+            <IconStyle id="3282">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3283">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3286">
+            <IconStyle id="3287">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3288">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3291">
+            <IconStyle id="3292">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3293">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3296">
+            <IconStyle id="3297">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3298">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3301">
+            <IconStyle id="3302">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3303">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3306">
+            <IconStyle id="3307">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3308">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3311">
+            <IconStyle id="3312">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3313">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3316">
+            <IconStyle id="3317">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3318">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3321">
+            <IconStyle id="3322">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3323">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3326">
+            <IconStyle id="3327">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3328">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3331">
+            <IconStyle id="3332">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3333">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3336">
+            <IconStyle id="3337">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3338">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Style id="3341">
+            <IconStyle id="3342">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <scale>1</scale>
+                <heading>0</heading>
+                <Icon id="3343">
+                    <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+        <Placemark id="3195">
+            <name>AL022019 + delta 0</name>
+            <description>63.28 knots
+2019-07-14 06:00:00+00:00
+(-92.51382558345796, 31.078440791368486) (Lon, Lat)</description>
+            <TimeStamp id="3196">
+                <when>2019-07-14 06:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>63.282165825366974</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="3194">
+                <coordinates>-92.51382558345796,31.078440791368486,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3200">
+            <name>AL022019 + delta 1</name>
+            <description>66.25 knots
+2019-07-14 12:00:00+00:00
+(-93.00662366747856, 31.667681935429574) (Lon, Lat)</description>
+            <TimeStamp id="3201">
+                <when>2019-07-14 12:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>66.25328361988068</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="3199">
+                <coordinates>-93.00662366747856,31.667681935429574,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3205">
+            <name>AL022019 + delta 2</name>
+            <description>63.07 knots
+2019-07-14 18:00:00+00:00
+(-93.32212318778039, 32.353823786973955) (Lon, Lat)</description>
+            <TimeStamp id="3206">
+                <when>2019-07-14 18:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>63.06632041931152</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="3204">
+                <coordinates>-93.32212318778039,32.353823786973955,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3210">
+            <name>AL022019 + delta 3</name>
+            <description>61.69 knots
+2019-07-15 00:00:00+00:00
+(-93.4477435976267, 33.179638367891314) (Lon, Lat)</description>
+            <TimeStamp id="3211">
+                <when>2019-07-15 00:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>61.68722867965698</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="3209">
+                <coordinates>-93.4477435976267,33.179638367891314,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3215">
+            <name>AL022019 + delta 4</name>
+            <description>63.26 knots
+2019-07-15 06:00:00+00:00
+(-93.46429446935653, 34.02547030448913) (Lon, Lat)</description>
+            <TimeStamp id="3216">
+                <when>2019-07-15 06:00:00+00:00</when>
+            </TimeStamp>
+            <ExtendedData>
+                <Data name="wind">
+                    <value>63.258055448532104</value>
+                    <displayName>Wind Intensity (knots)</displayName>
+                </Data>
+            </ExtendedData>
+            <Point id="3214">
+                <coordinates>-93.46429446935653,34.02547030448913,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3220">
+            <name>AL022019 history - delta 0</name>
+            <description>25 knots
+2019-07-10 12:00:00
+(86.5W, 28.5N) (Lon, Lat)</description>
+            <styleUrl>#3221</styleUrl>
+            <Point id="3219">
+                <coordinates>-86.5,28.5,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3225">
+            <name>AL022019 history - delta 1</name>
+            <description>30 knots
+2019-07-10 18:00:00
+(87.1W, 28.1N) (Lon, Lat)</description>
+            <styleUrl>#3226</styleUrl>
+            <Point id="3224">
+                <coordinates>-87.1,28.1,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3230">
+            <name>AL022019 history - delta 2</name>
+            <description>30 knots
+2019-07-11 00:00:00
+(87.6W, 27.8N) (Lon, Lat)</description>
+            <styleUrl>#3231</styleUrl>
+            <Point id="3229">
+                <coordinates>-87.6,27.8,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3235">
+            <name>AL022019 history - delta 3</name>
+            <description>35 knots
+2019-07-11 06:00:00
+(88.0W, 27.7N) (Lon, Lat)</description>
+            <styleUrl>#3236</styleUrl>
+            <Point id="3234">
+                <coordinates>-88.0,27.7,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3240">
+            <name>AL022019 history - delta 4</name>
+            <description>35 knots
+2019-07-11 12:00:00
+(88.4W, 27.7N) (Lon, Lat)</description>
+            <styleUrl>#3241</styleUrl>
+            <Point id="3239">
+                <coordinates>-88.4,27.7,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3245">
+            <name>AL022019 history - delta 5</name>
+            <description>40 knots
+2019-07-11 18:00:00
+(88.8W, 27.7N) (Lon, Lat)</description>
+            <styleUrl>#3246</styleUrl>
+            <Point id="3244">
+                <coordinates>-88.8,27.7,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3250">
+            <name>AL022019 history - delta 6</name>
+            <description>45 knots
+2019-07-12 00:00:00
+(89.2W, 27.8N) (Lon, Lat)</description>
+            <styleUrl>#3251</styleUrl>
+            <Point id="3249">
+                <coordinates>-89.2,27.8,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3255">
+            <name>AL022019 history - delta 7</name>
+            <description>45 knots
+2019-07-12 06:00:00
+(89.7W, 27.9N) (Lon, Lat)</description>
+            <styleUrl>#3256</styleUrl>
+            <Point id="3254">
+                <coordinates>-89.7,27.9,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3260">
+            <name>AL022019 history - delta 8</name>
+            <description>50 knots
+2019-07-12 12:00:00
+(90.2W, 28.1N) (Lon, Lat)</description>
+            <styleUrl>#3261</styleUrl>
+            <Point id="3259">
+                <coordinates>-90.2,28.1,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3265">
+            <name>AL022019 history - delta 9</name>
+            <description>55 knots
+2019-07-12 18:00:00
+(90.7W, 28.4N) (Lon, Lat)</description>
+            <styleUrl>#3266</styleUrl>
+            <Point id="3264">
+                <coordinates>-90.7,28.4,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3270">
+            <name>AL022019 history - delta 10</name>
+            <description>60 knots
+2019-07-13 00:00:00
+(91.1W, 28.6N) (Lon, Lat)</description>
+            <styleUrl>#3271</styleUrl>
+            <Point id="3269">
+                <coordinates>-91.1,28.6,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3275">
+            <name>AL022019 history - delta 11</name>
+            <description>60 knots
+2019-07-13 06:00:00
+(91.5W, 28.9N) (Lon, Lat)</description>
+            <styleUrl>#3276</styleUrl>
+            <Point id="3274">
+                <coordinates>-91.5,28.9,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3280">
+            <name>AL022019 history - delta 12</name>
+            <description>65 knots
+2019-07-13 12:00:00
+(91.9W, 29.3N) (Lon, Lat)</description>
+            <styleUrl>#3281</styleUrl>
+            <Point id="3279">
+                <coordinates>-91.9,29.3,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3285">
+            <name>AL022019 history - delta 13</name>
+            <description>65 knots
+2019-07-13 15:00:00
+(92.2W, 29.6N) (Lon, Lat)</description>
+            <styleUrl>#3286</styleUrl>
+            <Point id="3284">
+                <coordinates>-92.2,29.6,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3290">
+            <name>AL022019 history - delta 14</name>
+            <description>60 knots
+2019-07-13 18:00:00
+(92.4W, 29.9N) (Lon, Lat)</description>
+            <styleUrl>#3291</styleUrl>
+            <Point id="3289">
+                <coordinates>-92.4,29.9,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3295">
+            <name>AL022019 history - delta 15</name>
+            <description>50 knots
+2019-07-14 00:00:00
+(92.8W, 30.4N) (Lon, Lat)</description>
+            <styleUrl>#3296</styleUrl>
+            <Point id="3294">
+                <coordinates>-92.8,30.4,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3300">
+            <name>AL022019 history - delta 16</name>
+            <description>40 knots
+2019-07-14 06:00:00
+(93.2W, 31.0N) (Lon, Lat)</description>
+            <styleUrl>#3301</styleUrl>
+            <Point id="3299">
+                <coordinates>-93.2,31.0,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3305">
+            <name>AL022019 history - delta 17</name>
+            <description>35 knots
+2019-07-14 12:00:00
+(93.5W, 31.6N) (Lon, Lat)</description>
+            <styleUrl>#3306</styleUrl>
+            <Point id="3304">
+                <coordinates>-93.5,31.6,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3310">
+            <name>AL022019 history - delta 18</name>
+            <description>35 knots
+2019-07-14 18:00:00
+(93.6W, 32.3N) (Lon, Lat)</description>
+            <styleUrl>#3311</styleUrl>
+            <Point id="3309">
+                <coordinates>-93.6,32.3,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3315">
+            <name>AL022019 history - delta 19</name>
+            <description>25 knots
+2019-07-15 00:00:00
+(93.6W, 33.0N) (Lon, Lat)</description>
+            <styleUrl>#3316</styleUrl>
+            <Point id="3314">
+                <coordinates>-93.6,33.0,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3320">
+            <name>AL022019 history - delta 20</name>
+            <description>25 knots
+2019-07-15 06:00:00
+(93.6W, 33.9N) (Lon, Lat)</description>
+            <styleUrl>#3321</styleUrl>
+            <Point id="3319">
+                <coordinates>-93.6,33.9,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3325">
+            <name>AL022019 history - delta 21</name>
+            <description>20 knots
+2019-07-15 12:00:00
+(93.6W, 34.7N) (Lon, Lat)</description>
+            <styleUrl>#3326</styleUrl>
+            <Point id="3324">
+                <coordinates>-93.6,34.7,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3330">
+            <name>AL022019 history - delta 22</name>
+            <description>20 knots
+2019-07-15 18:00:00
+(93.5W, 35.5N) (Lon, Lat)</description>
+            <styleUrl>#3331</styleUrl>
+            <Point id="3329">
+                <coordinates>-93.5,35.5,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3335">
+            <name>AL022019 history - delta 23</name>
+            <description>15 knots
+2019-07-16 00:00:00
+(93.3W, 36.3N) (Lon, Lat)</description>
+            <styleUrl>#3336</styleUrl>
+            <Point id="3334">
+                <coordinates>-93.3,36.3,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="3340">
+            <name>AL022019 history - delta 24</name>
+            <description>15 knots
+2019-07-16 06:00:00
+(92.9W, 37.2N) (Lon, Lat)</description>
+            <styleUrl>#3341</styleUrl>
+            <Point id="3339">
+                <coordinates>-92.9,37.2,0.0</coordinates>
+            </Point>
+        </Placemark>
+    </Document>
+</kml>

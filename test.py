@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import os
 import pandas as pd
 import tensorflow as tf
 from deploy import inference
@@ -115,7 +116,10 @@ for storm in data.storm_id.unique() :
     if "all_timesteps" in config.keys() :
         buffer = 1 if config["all_timesteps"]['placeholders'] else 5 # buffer determines start and end index
         inferences = []
+        tables = dict()
+        os.mkdir(f"results/{storm}_gis_files") # make a directory for the images and kml
         for index in range(buffer, len(hurricane.entries))  :
+            timestamp = [* hurricane.entries][index]
             prediction = {
                 'universal' : inference(config['base_directory'],
                                    config['model_file'],
@@ -130,24 +134,34 @@ for storm in data.storm_id.unique() :
                                        time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
                                    }, storm)) if 'univariate' in config.keys() else None
             }
+            # note that this clears the memory, without this line, there's a fatal memory leak
             tf.keras.backend.clear_session()
+            
+            # add results to appropriate data structures
+            tables[timestamp] = create_table(prediction,hurricane)
             inferences.append(prediction)
+            
             # create plotting file, including KML and a PNG ouput with a track
             plotting_utils.process_results({
                     'inference' : prediction['universal'],
                     'track' : args.test
                 },
-                postfix = f"universal_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
+                postfix = f"{storm}_gis_files/universal_{timestamp.strftime('%Y_%m_%d_%H_%M')}")
             if prediction['singular'] :
                 plotting_utils.process_results({
                     'inference' : prediction['singular'],
                     'track' : args.test
                 },
-                postfix = f"singular_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}")
-            
-            # save to csv
-            pd.DataFrame.from_dict(create_table(prediction,hurricane)
-                                  ).to_csv(f"results/inferences_{storm}_{[* hurricane.entries][index].strftime('%Y_%m_%d_%H_%M')}.csv")
+                postfix = f"{storm}_gis_files/singular_{timestamp.strftime('%Y_%m_%d_%H_%M')}")
+        
+        # Save to excel sheet
+        print("Writing files to Excel . . . ", end = '')
+        with pd.ExcelWriter(f"results/{storm}.xlsx") as writer :
+            for timestep in tables :
+                pd.DataFrame.from_dict(tables[timestep]).to_excel(
+                    writer, sheet_name = timestep.strftime("%Y_%m_%d_%H_%M"))
+        print("Done!")
+        
     else :
         # generate inference dictionary
         inferences = {
