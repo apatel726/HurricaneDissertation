@@ -50,7 +50,7 @@ def parse_entries(entries, storm) :
         'storm' : storm
     }]
 
-def create_table(prediction, storm, delta = 6) : 
+def create_table(prediction, storm, deltas) : 
     '''
     Creates an output table meant for CSV export
     
@@ -69,7 +69,7 @@ def create_table(prediction, storm, delta = 6) :
         time = time.replace(tzinfo=None)
         result = {
             'time' : time,
-            'delta' : delta * (index + 1),
+            'delta' : deltas[index],
             'Mpredict_Wind' : prediction['universal'][storm.id]['wind'][index],
             'Mpredict_Lat' : prediction['universal'][storm.id]['lat'][index],
             'Mpredict_Lon' : prediction['universal'][storm.id]['lon'][index],
@@ -101,7 +101,7 @@ def create_table(prediction, storm, delta = 6) :
         results.append(result)
     return results
 
-# TODO: Pass contents to data_utils for data preparation/feature extraction
+output_times = [6, 12, 24, 36, 48]
 # create hurricane objects for different unique hurricanes
 for storm in data.storm_id.unique() :
     # get the storm entries
@@ -117,19 +117,22 @@ for storm in data.storm_id.unique() :
         buffer = 1 if config["all_timesteps"]['placeholders'] else 5 # buffer determines start and end index
         inferences = []
         tables = dict()
-        os.mkdir(f"results/{storm}_gis_files") # make a directory for the images and kml
+        if not os.path.exists(f"results/{storm}_gis_files") :
+            os.mkdir(f"results/{storm}_gis_files") # make a directory for the images and kml
         for index in range(buffer, len(hurricane.entries))  :
             timestamp = [* hurricane.entries][index]
             prediction = {
                 'universal' : inference(config['base_directory'],
                                    config['model_file'],
                                    config['scaler_file'],
+                                   output_times,
                                    parse_entries({
                                        time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
                                    }, storm)),
                 'singular' : inference(config['univariate']['base_directory'],
                                    None,
                                    None,
+                                   output_times,
                                    parse_entries({
                                        time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
                                    }, storm)) if 'univariate' in config.keys() else None
@@ -138,7 +141,7 @@ for storm in data.storm_id.unique() :
             tf.keras.backend.clear_session()
             
             # add results to appropriate data structures
-            tables[timestamp] = create_table(prediction,hurricane)
+            tables[timestamp] = create_table(prediction, hurricane)
             inferences.append(prediction)
             
             # create plotting file, including KML and a PNG ouput with a track
@@ -157,9 +160,19 @@ for storm in data.storm_id.unique() :
         # Save to excel sheet
         print("Writing files to Excel . . . ", end = '')
         with pd.ExcelWriter(f"results/{storm}.xlsx") as writer :
+            full_join = []
             for timestep in tables :
                 pd.DataFrame.from_dict(tables[timestep]).to_excel(
-                    writer, sheet_name = timestep.strftime("%Y_%m_%d_%H_%M"))
+                    writer, sheet_name = timestep.strftime("%Y_%m_%d_%H_%M"), index = False)
+                full_join.extend(tables[timestep]) # Create overview and aggregate page
+            
+            full_join_df = pd.DataFrame.from_dict(full_join)
+            full_join_df.to_excel(writer, sheet_name = 'full_join', index = False)
+            # generate overview page
+            overview = [full_join_df[full_join_df.time == time].sort_values(by ='delta').iloc[0]
+                       for time in full_join_df.time.unique()]
+            pd.DataFrame(overview).to_excel(writer, sheet_name = 'overview', index = False)
+            
         print("Done!")
         
     else :
