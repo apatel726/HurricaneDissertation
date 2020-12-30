@@ -11,6 +11,7 @@ Wind Intensity: Knots
 import os
 import fire
 import pandas as pd
+import numpy as np
 import pprint
 import pickle
 import json
@@ -162,6 +163,118 @@ def inference(base_directory: str, model_file: str, scaler_file: str, output_tim
         pp.pprint(results)
     
     del model
+    
+    return results
+
+def batch_inference(base_directory: str, model_file: str, scaler_file: str, output_times: list, storms: dict) -> None :
+    """
+    Pulls live storm data and runs single pass inference for every storm.
+    :param base_directory: Path to directory containing serialized artifacts (e.g. models, scalers).
+    :param model_file: Filename of the model file.
+    :param scaler_file: Filename of the scaler file.
+    :param file_type: String or a list of entry objects. String can be value "live". List of dict objects
+        in the form, 
+        [{  'storm' : storm,
+            'entries' : [ {
+                'time' : Datetime,
+                'wind' : float,
+                'lat' : float,
+                'lon' : float,
+                'pressure' : float
+            } for time in entries ]
+         }]
+    """
+    # load current model configuration
+    with open(os.path.join(base_directory, 'hyperparameters.json')) as f:
+        root = json.load(f)
+        if root['universal'] :
+            model_type = "universal"
+            # Initialize model
+            model = BidrectionalLstmHurricaneModel((None, None), model_type , os.path.join(base_directory, scaler_file),
+                                                   model_path=os.path.join(base_directory, model_file))
+        elif root['singular']:
+            model_type = "singular"
+            # Initialize all models
+            directories = os.listdir(base_directory)
+            model = dict()
+            for directory in directories :
+                if directory[:4] == 'wind' :
+                    model['wind'] = BidrectionalLstmHurricaneModel((None, None), 'wind',
+                                                                   os.path.join(base_directory + f"/{directory}",
+                                                                                'feature_scaler.pkl'),
+                                                                   model_path=os.path.join(base_directory,
+                                                                                           directory + f"/model{directory[4:]}"))
+                elif directory[:3] == 'lat' :
+                    model['lat'] = BidrectionalLstmHurricaneModel((None, None), 'lat',
+                                                                   os.path.join(base_directory + f"/{directory}",
+                                                                                'feature_scaler.pkl'),
+                                                                   model_path=os.path.join(base_directory,
+                                                                                           directory + f"/model{directory[3:]}"))
+                elif directory[:3] == 'lon' :
+                    model['lon'] = BidrectionalLstmHurricaneModel((None, None), 'lon',
+                                                                   os.path.join(base_directory + f"/{directory}",
+                                                                                'feature_scaler.pkl'),
+                                                                   model_path=os.path.join(base_directory,
+                                                                                           directory + f"/model{directory[3:]}"))
+    
+    lag = 5 # 5 (6hour) increments depending on how the dataframe is structured
+    wind_index = 0
+    lat_index = 1
+    lon_index = 2
+    
+    pp = pprint.PrettyPrinter()
+    pp.pprint(storms)
+    results = dict()
+    print("Creating batch file")
+    for storm in storms :
+        # create predictions        
+        if model_type == "universal" :
+            raw_results = model.model.predict(
+                [[model.scaler.transform(prep_hurricane_data(inputs, 1)[model.FEATURES].tail(lag).values)
+                  for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]])
+            
+            # translate predictions and add to results
+            results[storm['storm']] = { storm['entries'][index + lag]['time'] : {
+                'wind' : [inverse_scaled[2] for inverse_scaled in model.scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[i][wind_index])
+                     for i in range(lag)])],
+                'lat' : [inverse_scaled[0] for inverse_scaled in model.scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, result[i][lat_index])
+                     for i in range(lag)])],
+                'lon' : [inverse_scaled[1] for inverse_scaled in model.scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[i][lon_index])
+                     for i in range(lag)])]
+            } for index, result in enumerate(raw_results)}
+            
+            pp.pprint(results[storm['storm']])
+        
+        elif model_type == "singular" :
+            raw_results = {
+                'wind' : model['wind'].model.predict(
+                    [[model['wind'].scaler.transform(prep_hurricane_data(inputs, 1)[model['wind'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]]),
+                'lat' : model['lat'].model.predict(
+                    [[model['lat'].scaler.transform(prep_hurricane_data(inputs, 1)[model['lat'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]]),
+                'lon' : model['lon'].model.predict(
+                    [[model['lon'].scaler.transform(prep_hurricane_data(inputs, 1)[model['lon'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]])
+            }
+            
+            # translate predictions and add to results
+            results[storm['storm']] = { storm['entries'][i + lag]['time'] : {
+                'wind' : [inverse_scaled[2] for inverse_scaled in model['wind'].scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, raw_results['wind'][i][j])
+                     for j in range(lag)])],
+                'lat' : [inverse_scaled[0] for inverse_scaled in model['lat'].scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 0, raw_results['lat'][i][j])
+                     for j in range(lag)])],
+                'lon' : [inverse_scaled[1] for inverse_scaled in model['lon'].scaler.inverse_transform(
+                    [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, raw_results['lon'][i][j])
+                     for j in range(lag)])]
+            } for i in range(len(raw_results['wind']))} # length for wind, lat, and lon are the same
+            
+            pp.pprint(results[storm['storm']])
     
     return results
 
