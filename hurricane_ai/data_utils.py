@@ -103,7 +103,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     # Begin at the first (6 hour) lag with lag increments up to 30h inclusive
     times = [time * lag for time in
              range(1, (30 // lag) + 1)]
-    output_times = [6, 12, 24, 36, 48]
+    output_times = [12,18,24,30,36]
     # Get the full hurricane dataset
     hurricanes = HurricaneDataContainer()
 
@@ -111,7 +111,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     for hurricane in hurricanes:
 
         # Extract sequenced observations for the current hurricane
-        result = _get_hurricane_observations(hurricane, output_times = [6, 12, 24, 36, 48], timesteps, lag)
+        result = _get_hurricane_observations(hurricane, output_times, timesteps, lag)
 
         # Skip to the next hurricane if there are no observations
         if result is None:
@@ -122,8 +122,8 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
             [[list(sample[1][0].values()) for sample in x] for x in result['x']],
             dtype=precision)
         hurricane_y = np.array(
-            [[list(result['y'][time][index].values()) for time in output_times] for index in range(len(result['y'][6]))],
-            dtype=precision)
+            [[list(result['y'][time][index].values()) for time in output_times]
+             for index in range(len(result['y'][output_times[0]]))], dtype=precision)
 
         # Disregard if algorithm requires no missing values
         if remove_missing:
