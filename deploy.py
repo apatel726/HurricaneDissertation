@@ -10,6 +10,7 @@ Wind Intensity: Knots
 
 import os
 import fire
+import math
 import pandas as pd
 import numpy as np
 import pprint
@@ -221,6 +222,7 @@ def batch_inference(base_directory: str, model_file: str, scaler_file: str, outp
     wind_index = 0
     lat_index = 1
     lon_index = 2
+    batch_size = 32
     
     pp = pprint.PrettyPrinter()
     pp.pprint(storms)
@@ -229,11 +231,14 @@ def batch_inference(base_directory: str, model_file: str, scaler_file: str, outp
     for storm in storms :
         # create predictions        
         if model_type == "universal" :
-            raw_results = model.model.predict(
-                [[model.scaler.transform(prep_hurricane_data(inputs, 1)[model.FEATURES].tail(lag).values)
-                  for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]])
+            # create results from batches
+            raw_results = np.asarray([model.model.predict(batch_inputs)
+                           for batch_inputs in np.array_split([model.scaler.transform(prep_hurricane_data(inputs, 1)[model.FEATURES].tail(lag).values)
+                                                               for inputs in [storm['entries'][i : i + lag + 1]
+                                                                              for i in range(len(storm['entries']) - lag)]],
+                                                              math.ceil((len(storm['entries']) - lag) / batch_size))])
             
-            # translate predictions and add to results
+            # translate predictions and add to results. we combine the batches here
             results[storm['storm']] = { storm['entries'][index + lag]['time'] : {
                 'wind' : [inverse_scaled[2] for inverse_scaled in model.scaler.inverse_transform(
                     [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 2, result[i][wind_index])
@@ -244,22 +249,33 @@ def batch_inference(base_directory: str, model_file: str, scaler_file: str, outp
                 'lon' : [inverse_scaled[1] for inverse_scaled in model.scaler.inverse_transform(
                     [hurricane_ai.plotting_utils._generate_sparse_feature_vector(11, 1, result[i][lon_index])
                      for i in range(lag)])]
-            } for index, result in enumerate(raw_results)}
+            } for index, result in enumerate([result for sublist in raw_results for result in sublist])}
             
             pp.pprint(results[storm['storm']])
         
         elif model_type == "singular" :
             raw_results = {
-                'wind' : model['wind'].model.predict(
-                    [[model['wind'].scaler.transform(prep_hurricane_data(inputs, 1)[model['wind'].FEATURES].tail(lag).values)
-                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]]),
-                'lat' : model['lat'].model.predict(
-                    [[model['lat'].scaler.transform(prep_hurricane_data(inputs, 1)[model['lat'].FEATURES].tail(lag).values)
-                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]]),
-                'lon' : model['lon'].model.predict(
-                    [[model['lon'].scaler.transform(prep_hurricane_data(inputs, 1)[model['lon'].FEATURES].tail(lag).values)
-                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]]])
+                'wind' : np.asarray([model['wind'].model.predict(batch_inputs)
+                                     for batch_inputs in np.array_split([model['wind'].scaler.transform(
+                                         prep_hurricane_data(inputs, 1)[model['wind'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]],
+                                                              math.ceil((len(storm['entries']) - lag) / batch_size))]),
+                'lat' : np.asarray([model['lat'].model.predict(batch_inputs)
+                                     for batch_inputs in np.array_split([model['lat'].scaler.transform(
+                                         prep_hurricane_data(inputs, 1)[model['lat'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]],
+                                                              math.ceil((len(storm['entries']) - lag) / batch_size))]),
+                'lon' : np.asarray([model['lon'].model.predict(batch_inputs)
+                                     for batch_inputs in np.array_split([model['lon'].scaler.transform(
+                                         prep_hurricane_data(inputs, 1)[model['lon'].FEATURES].tail(lag).values)
+                      for inputs in [storm['entries'][i : i + lag + 1] for i in range(len(storm['entries']) - lag)]],
+                                                              math.ceil((len(storm['entries']) - lag) / batch_size))])
             }
+            
+            # reshape batch files
+            raw_results['wind'] = [result for sublist in raw_results['wind'] for result in sublist]
+            raw_results['lat'] = [result for sublist in raw_results['lat'] for result in sublist]
+            raw_results['lon'] = [result for sublist in raw_results['lon'] for result in sublist]
             
             # translate predictions and add to results
             results[storm['storm']] = { storm['entries'][i + lag]['time'] : {

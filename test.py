@@ -4,7 +4,8 @@ import json
 import os
 import pandas as pd
 import tensorflow as tf
-from deploy import inference
+from datetime import timedelta
+from deploy import inference, batch_inference
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 from hurricane_ai.container.hurricane_data_container import Hurricane
 from hurricane_ai import plotting_utils
@@ -29,6 +30,7 @@ with open(args.config) as f :
 # TODO: Read in test file from hurricanecontrainer.py
 data_container = HurricaneDataContainer()
 data = data_container._parse(args.test)
+
 def parse_entries(entries, storm) :
     '''
     "entries" : array of dict # The data for the storm in the form,
@@ -42,10 +44,10 @@ def parse_entries(entries, storm) :
     '''
     return [{ 'entries' : [{
             'time' : time,
-            'wind' : hurricane.entries[time]['max_wind'],
-            'lat' : hurricane.entries[time]['lat'],
-            'lon' : hurricane.entries[time]['long'],
-            'pressure' : hurricane.entries[time]['min_pressure']
+            'wind' : entries[time]['max_wind'],
+            'lat' : entries[time]['lat'],
+            'lon' : entries[time]['long'],
+            'pressure' : entries[time]['min_pressure']
         } for time in entries],
         'storm' : storm
     }]
@@ -102,60 +104,58 @@ def create_table(prediction, storm, deltas) :
     return results
 
 output_times = [6, 12, 24, 36, 48]
+input_length = 6
 # create hurricane objects for different unique hurricanes
 for storm in data.storm_id.unique() :
     # get the storm entries
     entries = data[data['storm_id'] == storm]
+    # not enough entries
+    if len(entries) < input_length :
+        print(f"{storm} only has {len(entries)} entries and the minimum is {input_length}. Skipping")
+        continue
     
     # convert to hurricane object
     hurricane = Hurricane(storm, storm)
-    for index, entry in entries.iterrows():
+    for index, entry in entries.iterrows() :
         hurricane.add_entry(entry[2:]) # start at index 2 because of HURDAT2 format
     
     # check to see if we're running on all time steps
-    if "all_timesteps" in config.keys() :
-        buffer = 1 if config["all_timesteps"]['placeholders'] else 5 # buffer determines start and end index
-        inferences = []
+    if "all_timesteps" in config :
+        buffer = 1 if config['all_timesteps']['placeholders'] else 5 # buffer determines start and end index
         tables = dict()
+        
         if not os.path.exists(f"results/{storm}_gis_files") :
             os.mkdir(f"results/{storm}_gis_files") # make a directory for the images and kml
-        for index in range(buffer, len(hurricane.entries))  :
-            timestamp = [* hurricane.entries][index]
-            prediction = {
-                'universal' : inference(config['base_directory'],
+        
+        predictions = {
+            'universal' : batch_inference(config['base_directory'],
                                    config['model_file'],
                                    config['scaler_file'],
                                    output_times,
-                                   parse_entries({
-                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
-                                   }, storm)),
-                'singular' : inference(config['univariate']['base_directory'],
+                                   parse_entries(hurricane.entries, storm)),
+            'singular' : batch_inference(config['univariate']['base_directory'],
                                    None,
                                    None,
                                    output_times,
-                                   parse_entries({
-                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
-                                   }, storm)) if 'univariate' in config.keys() else None
-            }
-            # note that this clears the memory, without this line, there's a fatal memory leak
-            tf.keras.backend.clear_session()
-            
-            # add results to appropriate data structures
-            tables[timestamp] = create_table(prediction, hurricane)
-            inferences.append(prediction)
-            
-            # create plotting file, including KML and a PNG ouput with a track
-            plotting_utils.process_results({
-                    'inference' : prediction['universal'],
-                    'track' : args.test
-                },
-                postfix = f"{storm}_gis_files/universal_{timestamp.strftime('%Y_%m_%d_%H_%M')}")
-            if prediction['singular'] :
-                plotting_utils.process_results({
-                    'inference' : prediction['singular'],
-                    'track' : args.test
-                },
-                postfix = f"{storm}_gis_files/singular_{timestamp.strftime('%Y_%m_%d_%H_%M')}")
+                                   parse_entries(hurricane.entries, storm)) if 'univariate' in config else None
+        }
+        # clean up inference session
+        tf.keras.backend.clear_session()
+        
+        tables = {timestamp : create_table(
+            {'universal' : { storm : {
+                            'times' : [timestamp + timedelta(hours = hour) for hour in output_times],
+                            'wind' : predictions['universal'][storm][timestamp]['wind'],
+                            'lat' : predictions['universal'][storm][timestamp]['lat'],
+                            'lon' : predictions['universal'][storm][timestamp]['lon']
+                           }},
+             'singular' : { storm : {
+                            'times' : [timestamp + timedelta(hours = hour) for hour in output_times],
+                            'wind' : predictions['singular'][storm][timestamp]['wind'],
+                            'lat' : predictions['singular'][storm][timestamp]['lat'],
+                            'lon' : predictions['singular'][storm][timestamp]['lon']
+                           }}
+            }, hurricane, output_times) for timestamp in [ * hurricane.entries][len(output_times) : ] }
         
         # Save to excel sheet
         print("Writing files to Excel . . . ", end = '')
@@ -172,6 +172,45 @@ for storm in data.storm_id.unique() :
             overview = [full_join_df[full_join_df.time == time].sort_values(by ='delta').iloc[0]
                        for time in full_join_df.time.unique()]
             pd.DataFrame(overview).to_excel(writer, sheet_name = 'overview', index = False)
+        
+        # for index in range(buffer, len(hurricane.entries))  :
+        while False :
+            timestamp = [* hurricane.entries][index]
+            prediction = {
+                'universal' : inference(config['base_directory'],
+                                   config['model_file'],
+                                   config['scaler_file'],
+                                   output_times,
+                                   parse_entries({
+                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
+                                   }, storm)),
+                'singular' : inference(config['univariate']['base_directory'],
+                                   None,
+                                   None,
+                                   output_times,
+                                   parse_entries({
+                                       time : hurricane.entries[time] for time in [* hurricane.entries][ : index + 1]
+                                   }, storm)) if 'univariate' in config else None
+            }
+            # note that this clears the memory, without this line, there's a fatal memory leak
+            tf.keras.backend.clear_session()
+            
+            # add results to appropriate data structures
+            tables[timestamp] = create_table(prediction, hurricane, output_times)
+            inferences.append(prediction)
+            
+            # create plotting file, including KML and a PNG ouput with a track
+            plotting_utils.process_results({
+                    'inference' : prediction['universal'],
+                    'track' : args.test
+                },
+                postfix = f"{storm}_gis_files/universal_{timestamp.strftime('%Y_%m_%d_%H_%M')}")
+            if prediction['singular'] :
+                plotting_utils.process_results({
+                    'inference' : prediction['singular'],
+                    'track' : args.test
+                },
+                postfix = f"{storm}_gis_files/singular_{timestamp.strftime('%Y_%m_%d_%H_%M')}")        
             
         print("Done!")
         
