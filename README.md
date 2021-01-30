@@ -4,7 +4,7 @@
 
 # Quickstart
 
-Model Command Line Arguments
+Model Creation Command Line Arguments
 ----------------------------
 
 Create the model specified with the command line. e.g.
@@ -74,3 +74,19 @@ docker run -it -p 8888:8888 huraim
 
 After running the above commands, open up a web browser and go to
 `localhost:8888`. 
+
+Creation Predictions Quickstart
+----------------------
+
+
+Tutorial
+
+Test File Prediction
+
+python "test.py" --config "name of file to load configuration" --test "location of test file"
+python test.py --config data/config.json --test data/hurdat2_test.txt
+
+Live Hurricane Prediction
+
+python "test.py" --config "name of file to load configuration" --test "location of test file"
+python test.py --config data/config.json --test data/hurdat2_test.txt

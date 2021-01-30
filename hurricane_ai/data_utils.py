@@ -10,7 +10,6 @@ from hurricane_ai import is_source_modified, HURRICANE_SOURCE_FILE, TRAIN_TEST_N
 from hurricane_ai.container.hurricane_data_container import Hurricane
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 
-
 def subset_features(data, feature_idx: int) -> np.array:
     """
     Extracts a feature subset from data at the given position.
@@ -104,7 +103,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     # Begin at the first (6 hour) lag with lag increments up to 30h inclusive
     times = [time * lag for time in
              range(1, (30 // lag) + 1)]
-
+    output_times = [12,18,24,30,36]
     # Get the full hurricane dataset
     hurricanes = HurricaneDataContainer()
 
@@ -112,7 +111,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     for hurricane in hurricanes:
 
         # Extract sequenced observations for the current hurricane
-        result = _get_hurricane_observations(hurricane, timesteps, lag)
+        result = _get_hurricane_observations(hurricane, output_times, timesteps, lag)
 
         # Skip to the next hurricane if there are no observations
         if result is None:
@@ -123,8 +122,8 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
             [[list(sample[1][0].values()) for sample in x] for x in result['x']],
             dtype=precision)
         hurricane_y = np.array(
-            [[list(result['y'][time][index].values()) for time in times] for index in range(len(result['y'][lag]))],
-            dtype=precision)
+            [[list(result['y'][time][index].values()) for time in output_times]
+             for index in range(len(result['y'][output_times[0]]))], dtype=precision)
 
         # Disregard if algorithm requires no missing values
         if remove_missing:
@@ -147,7 +146,7 @@ def build_ml_dataset(timesteps, remove_missing) -> dict:
     return {'x': x, 'y': y}
 
 
-def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
+def _get_hurricane_observations(storm: Hurricane, output_times, timesteps=1, lag=6) -> dict:
     """
     PURPOSE: Create independent and dependent samples for a machine learning model based on the timesteps
     METHOD: Use the HURDAT2 database and a hurricane object as defined in hurricane-net for feature extraction
@@ -162,7 +161,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
     x = []
     # Create testing data structure with a dictionary
     times = [time * lag for time in range(1, (30 // lag) + 1)]
-    y = dict([(time, []) for time in times])
+    y = dict([(time, []) for time in output_times])
 
     # Sort by entry time
     entries = [entry[1] for entry in sorted(storm.entries.items())]
@@ -193,7 +192,7 @@ def _get_hurricane_observations(storm: Hurricane, timesteps=1, lag=6) -> dict:
         x.append(sample)  # Add our constructed sample
             
         # Calculate time steps and their features for dependent values
-        for future in times:
+        for future in output_times: # note that this is custom for nova, use var `times` as an alternative
             timestep = storm.entries.get(entry_time + timedelta(hours=future))
             previous = storm.entries.get(entry_time + timedelta(hours=future - lag))
             

@@ -111,6 +111,9 @@ def singular() :
     bidir_lstm_model_lon_hist = bidir_lstm_model_lon.train(X_train, y_train_lon, X_val, y_val_lon,
                                                            load_if_exists=args.load, epochs=args.epochs,
                                                              directory = directory)
+    # save the configuration into parent directory
+    with open(f'{directory}hyperparameters.json', 'w+') as hyperparameters :
+        json.dump(args, hyperparameters)
     
     return {
         'wind' : (bidir_lstm_model_wind, bidir_lstm_model_wind_hist),

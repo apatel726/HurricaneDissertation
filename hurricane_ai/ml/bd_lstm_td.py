@@ -133,7 +133,7 @@ class BidrectionalLstmHurricaneModel:
 
         # create model directory
         timestamp = datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M")
-        prefix = f'hurricane_ai/models/{directory}'
+        prefix = f'hurricane_ai/models/{directory}{self.predicted_var}_'
         logs = tf.keras.callbacks.TensorBoard(log_dir = f'{prefix}{timestamp}/', histogram_freq = 1,
                                               profile_batch = 0)
         
