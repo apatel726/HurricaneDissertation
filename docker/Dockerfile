@@ -9,7 +9,7 @@ RUN git config --global user.email "vm"
 RUN git config --global user.name "vm"
 
 # Install requirements for cartopy
-RUN apt install libproj-dev proj-data proj-bin libgeos-dev python3-dev
+RUN apt install -y libproj-dev proj-data proj-bin libgeos-dev python3-dev
 
 # Python requirements
 RUN pip install -r /tf/huraim/requirements.txt
