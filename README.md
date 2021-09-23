@@ -53,6 +53,12 @@ Tutorial
 Tensorboard Quickstart
 ----------------------
 
+Tensorboard utilizes the 6006 port and we will need to have that open during our docker run such as,
+
+```bash
+docker run -it -p 8888:8888 -p 6006:6006 huraim
+```
+
 Enter in the following command inside a Jupyterlab terminal from the Docker setup,
 
 ```bash
