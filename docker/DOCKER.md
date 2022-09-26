@@ -14,6 +14,14 @@ docker build -t huraim .
 docker run -it -p 8888:8888 -p 6006:6006 huraim
 ```
 
+If we're using GPU's, run the full command with the appropriate port for
+Tensorboard. Also reference the issue link for a full overview on making sure
+GPU's are running, https://github.com/apatel726/HurricaneDissertation/issues/52
+
+```bash
+docker run --gpus all -it -p 8888:8888 -p 6006:6006 huraim
+```
+
 After running the above commands, open up a web browser and go to
 `localhost:8888` for Jupyter Lab and `localhost:6006` for TensorBoard. Note that
 TensorBoard needs to be run inside the container before being able to access it.

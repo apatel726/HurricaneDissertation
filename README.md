@@ -2,7 +2,40 @@
 
 **Hur**ricane **A**rtificial **I**ntelligence using **M**achine Learning 
 
-# Quickstart
+## Git Quickstart
+
+First, we open up a terminal and double check if we have git installed. 
+Then, we can clone the code using this command and git. These commands 
+are meant to be run inside the same directory. Currently, Github hosts
+our git repository.
+
+```bash
+git clone https://github.com/apatel726/HurricaneDissertation.git
+```
+When we make changes, we can see them here.
+
+```bash
+git diff
+```
+After confirming the changes, we can add them, or add all of the changes like here,
+
+```bash
+git add -A
+```
+Before uploading the changes, they all need a message pertaining to the development
+of the code. 
+
+```bash
+git commit -m "Out of a mountain of despair, a stone of hope."
+```
+This command uploads the code to the main branch. If you are on a different branch,
+it is the same command to upload to the same branch on GitHub.
+
+```bash
+git push
+```
+
+## Quickstart
 
 Model Creation Command Line Arguments
 ----------------------------
@@ -75,7 +108,12 @@ the following commands should be run inside the `docker` folder.
 
 ```bash
 docker build -t huraim .
-docker run -it -p 8888:8888 huraim
+docker run --gpus all -it -p 8888:8888 -p 6006:6006 huraim
+```
+
+The above enables GPU. If GPU's are not available, replace with the following command,
+```bash
+docker run -it -p 8888:8888 -p 6006:6006 huraim
 ```
 
 After running the above commands, open up a web browser and go to
