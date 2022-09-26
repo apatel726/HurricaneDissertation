@@ -10,7 +10,7 @@ are meant to be run inside the same directory. Currently, Github hosts
 our git repository.
 
 ```bash
-git clone
+git clone https://github.com/apatel726/HurricaneDissertation.git
 ```
 When we make changes, we can see them here.
 
