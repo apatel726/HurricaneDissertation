@@ -75,12 +75,12 @@ the following commands should be run inside the `docker` folder.
 
 ```bash
 docker build -t huraim .
-docker run --gpus all -it -p 8888:8888 huraim
+docker run --gpus all -it -p 8888:8888 -p 6006:6006 huraim
 ```
 
 The above enables GPU. If GPU's are not available, replace with the following command,
 ```bash
-docker run -it -p 8888:8888 huraim
+docker run -it -p 8888:8888 -p 6006:6006 huraim
 ```
 
 After running the above commands, open up a web browser and go to
