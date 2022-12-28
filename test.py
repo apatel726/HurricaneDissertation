@@ -9,6 +9,7 @@ from deploy import inference, batch_inference
 from hurricane_ai.container.hurricane_data_container import HurricaneDataContainer
 from hurricane_ai.container.hurricane_data_container import Hurricane
 from hurricane_ai import plotting_utils
+import great_circle_calculator.great_circle_calculator as gcc
 
 # Create arugment parser for command line interface
 # https://docs.python.org/3/howto/argparse.html
@@ -54,7 +55,17 @@ def parse_entries(entries, storm) :
 
 def create_table(prediction, storm, deltas) : 
     '''
-    Creates an output table meant for CSV export
+    Creates an output table meant for CSV export.
+    The following are details on the tags in the column name:
+    'M' : Multivariate model
+    'U' : Universal model
+    'predict' : A prediction from the model
+    'Truth' : Compared to the prediction, this is the realized value
+    'diff' : The difference between in appropriate units
+    'Wind' : Wind, in nautical miles
+    'Lat' : Latitude, in decimal degrees
+    'Lon' : Longitude, in decimeal degrees
+    'Dist' : Distance, in meters
     
     Args:
         prediction (list(dict)) : The predictions in dict of form,
@@ -72,24 +83,33 @@ def create_table(prediction, storm, deltas) :
         result = {
             'time' : time,
             'delta' : deltas[index],
-            'Mpredict_Wind' : prediction['universal'][storm.id]['wind'][index],
-            'Mpredict_Lat' : prediction['universal'][storm.id]['lat'][index],
-            'Mpredict_Lon' : prediction['universal'][storm.id]['lon'][index],
-            'Upredict_Wind' : prediction['singular'][storm.id]['wind'][index],
-            'Upredict_Lat' : prediction['singular'][storm.id]['lat'][index],
-            'Upredict_Lon' : prediction['singular'][storm.id]['lon'][index]
+            'Mpredict_Wind' : prediction['singular'][storm.id]['wind'][index],
+            'Mpredict_Lat' : prediction['singular'][storm.id]['lat'][index],
+            'Mpredict_Lon' : prediction['singular'][storm.id]['lon'][index],
+            'Upredict_Wind' : prediction['universal'][storm.id]['wind'][index],
+            'Upredict_Lat' : prediction['universal'][storm.id]['lat'][index],
+            'Upredict_Lon' : prediction['universal'][storm.id]['lon'][index]
         }
+        # gcc library uses (lon, lat)
         if time in storm.entries.keys() :
             truth_entry = storm.entries[time]
             result.update({'WindTruth' : truth_entry['max_wind'],
                         'LatTruth' : truth_entry['lat'],
                         'LonTruth' : truth_entry['long'] * -1,
-                        'Mdiff_Wind' : truth_entry['max_wind'] - prediction['universal'][storm.id]['wind'][index],
-                        'Mdiff_Lat' : truth_entry['lat'] - prediction['universal'][storm.id]['lat'][index],
-                        'Mdiff_Lon' : (truth_entry['long'] * -1) - prediction['universal'][storm.id]['lon'][index],
-                        'Udiff_Wind' : truth_entry['max_wind'] - prediction['singular'][storm.id]['wind'][index],
-                        'Udiff_Lat' : truth_entry['lat'] - prediction['singular'][storm.id]['lat'][index],
-                        'Udiff_Lon' : (truth_entry['long'] * -1) - prediction['singular'][storm.id]['lon'][index]})
+                        'Mdiff_Wind' : truth_entry['max_wind'] - prediction['singular'][storm.id]['wind'][index],
+                        'Mdiff_Dist' : gcc.distance_between_points(
+                            (truth_entry['long'], truth_entry['lat']),
+                            (prediction['singular'][storm.id]['lon'][index],
+                             prediction['singular'][storm.id]['lat'][index])),
+                        'Mdiff_Lat' : truth_entry['lat'] - prediction['singular'][storm.id]['lat'][index],
+                        'Mdiff_Lon' : (truth_entry['long'] * -1) - prediction['singular'][storm.id]['lon'][index],
+                        'Udiff_Wind' : truth_entry['max_wind'] - prediction['universal'][storm.id]['wind'][index],
+                        'Udiff_Dist' : gcc.distance_between_points(
+                            (truth_entry['long'], truth_entry['lat']),
+                            (prediction['universal'][storm.id]['lon'][index],
+                             prediction['universal'][storm.id]['lat'][index])),
+                        'Udiff_Lat' : truth_entry['lat'] - prediction['universal'][storm.id]['lat'][index],
+                        'Udiff_Lon' : (truth_entry['long'] * -1) - prediction['universal'][storm.id]['lon'][index]})
         else :
             result.update({'WindTruth' : 'N/A',
                         'LatTruth' : 'N/A',
