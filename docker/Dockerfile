@@ -1,9 +1,6 @@
-FROM tensorflow/tensorflow:2.1.0-gpu-py3-jupyter
+FROM tensorflow/tensorflow:2.11.0-gpu-jupyter
 COPY files/ /tf/huraim
 
-# Install git and clone the repository
-RUN apt update
-RUN apt install git -y
 RUN git clone --single-branch --branch master https://github.com/apatel726/HurricaneDissertation.git
 RUN git config --global user.email "vm"
 RUN git config --global user.name "vm"
