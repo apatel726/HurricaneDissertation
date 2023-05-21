@@ -127,10 +127,12 @@ Tutorial
 
 Test File Prediction
 
-python "test.py" --config "name of file to load configuration" --test "location of test file"
-python test.py --config data/config.json --test data/hurdat2_test.txt
+`python "test.py" --config "name of file to load configuration" --test "location of test file"`
+
+`python test.py --config data/config.json --test data/hurdat2_test.txt`
 
 Live Hurricane Prediction
 
-python "test.py" --config "name of file to load configuration" --test "location of test file"
-python test.py --config data/config.json --test data/hurdat2_test.txt
+`python "test.py" --config "name of file to load configuration" --test "location of test file"`
+
+`python test.py --config data/config.json --test data/hurdat2_test.txt`
