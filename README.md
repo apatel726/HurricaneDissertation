@@ -2,6 +2,20 @@
 
 **Hur**ricane **A**rtificial **I**ntelligence using **M**achine Learning 
 
+https://ams.confex.com/ams/101ANNUAL/meetingapp.cgi/Paper/380154
+
+```
+@article{Patel_Usmani_Brant_2021,
+	title        = {Multivariate LSTM approach to hurricane intensity and tracking predictions},
+	author       = {Patel, Akash B. and Usmani, Hammad and Brant, Jonathan C.},
+	year         = 2021,
+	month        = {Jan},
+	journal      = {AMS},
+	publisher    = {AMS},
+	url          = {https://ams.confex.com/ams/101ANNUAL/meetingapp.cgi/Paper/380154}
+}
+```
+
 ## Quickstart
 
 Model Creation Command Line Arguments
