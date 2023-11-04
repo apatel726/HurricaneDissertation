@@ -3,6 +3,9 @@ import numpy as np
 import datetime
 import argparse
 import pprint
+import mlflow
+# https://www.mlflow.org/docs/latest/getting-started/quickstart-1/index.html
+mlflow.autolog()
 
 from hurricane_ai import data_utils
 from hurricane_ai.ml.bd_lstm_td import BidrectionalLstmHurricaneModel
