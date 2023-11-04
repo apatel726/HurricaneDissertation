@@ -59,9 +59,9 @@ Tutorial
 
 ## Local Quickstart
 
+Run this in the root directory HurricaneDissertaion.
 ```bash
-wget https://raw.githubusercontent.com/apatel726/HurricaneDissertation/mlflow/docker/files/requirements.txt
-pip install -r requirements.txt
+pip install -r docker/files/requirements.txt
 ```
 
 ## Git Quickstart
@@ -97,20 +97,22 @@ it is the same command to upload to the same branch on GitHub.
 git push
 ```
                             
-Tensorboard Quickstart
+MLFlow Quickstart
 ----------------------
 
-Tensorboard utilizes the 6006 port and we will need to have that open during our docker run such as,
+MLflow utilizes the port 5000 and we will need to have that open during our docker run such as,
 
 ```bash
-docker run -it -p 8888:8888 -p 6006:6006 huraim
+docker run -it -p 8888:8888 -p 5000:5000 huraim
 ```
 
-Enter in the following command inside a Jupyterlab terminal from the Docker setup,
+We can run the UI for the MLflow dashboard with this command,
 
 ```bash
-tensorboard --logdir /tf/HurricaneDissertation/hurricane_ai/models/ --bind_all
+mlflow ui
 ```
+
+Please also reference https://www.mlflow.org/docs/latest/getting-started/quickstart-1/index.html
 
 ## Docker Quickstart
 
