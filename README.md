@@ -17,7 +17,14 @@ Accepts command line argument as either,
         Creates a universal model with wind intensity, lat, and long
     singular
         Creates singular models with 3 different models for wind, lat and long
-If none are specified, we create a universal model
+If none are specified, we create a universal model. The following are examples of logs that are output on the command line.
+
+```
+[2023-11-04T21:51:24.100109Z] [HURAIM] Creating our training and validation data structure
+[2023-11-04T21:51:24.108655Z] [HURAIM] Create universal features
+[2023-11-04T21:51:24.110969Z] [HURAIM] Train for wind intensity (index 0), lat (index 1), lon (index 2).
+[2023-11-04T21:51:24.192352Z] [HURAIM] Create and train bidirectional LSTM wind model
+```
 
 Training Command Line Arguments
 -------------------------------
