@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.11.0-gpu-jupyter
+FROM tensorflow/tensorflow:latest-gpu-jupyter
 COPY files/ /tf/huraim
 
 RUN git clone --single-branch --branch master https://github.com/apatel726/HurricaneDissertation.git
