@@ -1,7 +1,5 @@
 \documentclass{article}
 
-
-
 \usepackage{arxiv}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -17,49 +15,27 @@
 \usepackage{natbib}
 \usepackage{doi}
 
-
-
-\title{\emph{HURAIM}: Multivariate Long Short-Term Memory (LSTM) Networks for Real-time Hurricane Intensity and Trajectory Forecasting}
+\title{\emph{HURAIM}: Bi-Directional Long Short-Term Memory Networks for Real-time Hurricane Intensity and Trajectory Forecasting}
 
 %\date{September 9, 1985}	% Here you can change the date presented in the paper title
 %\date{} 					% Or removing it
 
-\author{ \href{https://orcid.org/0000-0000-0000-0000}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Akash B.~Patel}\thanks{Use footnote for providing further
-		information about author (webpage, alternative
-		address)---\emph{not} for acknowledging funding agencies.} \\
+\author{
+	Akash B.~Patel \\
 	University of Denver\\
 	Denver, Colorado \\
 	\texttt{apatel@college.edu} \\
-	%% examples of more authors
 	\And
-	\href{https://orcid.org/0000-0000-0000-0000}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Jonathan C.~Brant} \\
+	Jonathan C.~Brant \\
 	Lockheed Martin\\
 	King  of Prussia, Pennsylvania \\
 	\texttt{jonathan.c.brant@lmco.com} \\
 	\And
-	\href{https://orcid.org/0000-0000-0000-0000}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Hammad A.~Usmani} \\
+	Hammad A.~Usmani \\
 	Georgia Institute of Technology\\
 	Atlanta, Georgia \\
-	\texttt{husmani@gatech.edu} \\
-	%% \AND
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
-	%% \And
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
-	%% \And
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
+	\texttt{husmani@gatech.edu}
 }
-
-% Uncomment to remove the date
-%\date{}
 
 % Uncomment to override  the `A preprint' in the header
 %\renewcommand{\headeright}{Technical Report}
@@ -69,6 +45,7 @@
 %%% Add PDF metadata to help others organize their library
 %%% Once the PDF is generated, you can check the metadata with
 %%% $ pdfinfo template.pdf
+%JBCOMMENT: Probably worth updating this prior to submission
 \hypersetup{
 pdftitle={A template for the arxiv style},
 pdfsubject={q-bio.NC, q-bio.QM},
@@ -77,39 +54,58 @@ pdfkeywords={First keyword, Second keyword, More},
 }
 
 \begin{document}
+
 \maketitle
 
 \begin{abstract}
-	This paper will describe and show the development of an LSTM trained to predict hurricane kinematic (latitude and longitude movement) and barometric (pressure) measurements. The LSTM will be trained on a data pipeline of how the training and test data is ingested into an environment, converted to work with Python programming language with a TensorFlow and pandas data frame, creating inference, and outputting them for either a live hurricane or a test file. This will output four separate models: Multivariate (Primary Objective), Univariate Wind Model, Univariate Latitude Model, and the Univariate Longitude Model. These outputs for these models will be Predictions for Wind, Lat, and Long Multivariate 3 total for Univariate Output KML and CSV file for viewing purposes only. These disparate models will allow us to compare the accuracy of the Multivariate model inference (predictions) to that of the univariate models that current research is being done on. A simple regression averaging method called mean absolute error will be used for comparing the predictions of each output variable against the multivariate model. This paper will demonstrate how we implement, train, and evaluate the model for future research and use.
+This paper describes the design and implementation of a Long Short-Term Memory (LSTM) network trained to predict hurricane trajectory (sequence of latitude and longitude locations) and intensity (barometric pressure) measurements. The LSTM is trained using a custom data pipeline that ingests historical data from the National Hurricane Center, conditioning, transforming and augmenting data for model training and inference. Four distinct models are generated: a multivariate model that forecasts trajectory and and intensity in tandem, and three univariate models to forecast wind speed, latitude and longitude independently. We use a simple regression averaging method, called mean absolute error, to assess the comparative forecast accuracy between the multivariate model and the three univariate models, offering a quantitative baseline to inform optimal model selection for follow-on studies by weather scientists and to support operational analysis and implementation.
+%JBCOMMENT: Recommend incorporating a short preview of the results (i.e. which works better, multivariate or univariate) into the last sentence.
 \end{abstract}
 
 % begin adding from AMS_Paper_1221
 
 \section{Scope}
+%JBCOMMENT: Is "scope" a required section for AMS papers? I'm used to an introductory section, which would expand on the abstract, providing motivational details, a little bit of background, a short description of the approach and a preview of results.
 This paper will describe and show the development of an LSTM trained to predict hurricane kinematic (latitude and longitude movement) and barometric (pressure) measurements. The LSTM will be trained on a data pipeline of how the training and test data is ingested into an environment, converted to work with Python programming language with a TensorFlow and pandas data frame, creating inference, and outputting them for either a live hurricane or a test file. This will output four separate models:
 
-Multivariate (Primary Objective)
-Univariate Wind Model
-Univariate Latitude Model
-Univariate Longitude Model
+\begin{enumerate}
+	\item Multivariate (Primary Objective)
+	\item Univariate Wind Model
+	\item Univariate Latitude Model
+	\item Univariate Longitude Model
+\end{enumerate}
 
-These outputs for these models will be 
-Predictions for Wind, Lat, and Long
-Multivariate
-3 total for Univariate
-Output KML & CSV file for viewing purposes only
+%JBCOMMENT: Suggest adding quantitative attribute for wind (speed?)
+The univariate models individually predict wind, latitute and longitude, while the multivariate model is trained to predict all three simultaneously.
+
+%JBCOMMENT: Output formats seem like a really low-level implementation detail. They can probably be removed unless you feel that they are a really important/novel part of the research.
+Output KML and CSV file for viewing purposes only
 
 These disparate models will allow us to compare the accuracy of the Multivariate model inference (predictions) to that of the univariate models that current research is being done on. A simple regression averaging method called mean absolute error will be used for comparing the predictions of each output variable against the multivariate model. This paper will demonstrate how we implement, train, and evaluate the model for future research and use.
 
 \section{Tropical Storm Background}
-As of April 2019, $1.75 Trillion have been the cost of natural disasters since 1980. Of that, $927.5 Billion was due to tropical storms [1]. Hurricanes have traditionally been predicted using a traditional forecast called the Dvorak technique [2]. It’s a subjective one in which the different meteorologists could look at the same input data and make different intensity and track predictions. These predictions are based on three main components, dynamics of the current hurricane season, statistical evidence, and an ensemble approach that covers everything. There are drawbacks with each method. The dynamics of the current season don’t help early season hurricanes, statistical evidence can be far reaching and might not account for changing features such as climate change which has increased sea-surface level temperatures. The ensemble approach then takes the drawbacks of each and amplifies their respective errors. These errors are then accounted for in what’s known as the cone of probability which makes hurricane predictions improbable. The earliest models are statistical based and the best to date is known as CLIPER5, Climatology and Persistence (CLP5) which operates multivariate linear regression method [3]. CLIPER5 is commonly identified as an early model as most scientists believe that using statistical model only is not accurate enough to make predictions, this is where a deep learning architecture could help inference and make better predictions to reduce loss and help agencies get limited resources where they will be needed. Traditional forecast models have a hard time predicting what meteorologists describe as “intensification” which is the increase in sustained wind speeds of 35 mph over a 24-hour period. The research being done here will lay the groundwork to potentially introduce other variables from satellite measurements which could increase they accuracy of such models by 200% [4].
+%JBCOMMENT: This seems low for ALL natural disasters. Is it just weather and climate related disasters?
+Since 1980, natural disasters have imposed more than \$1.75 trillion in damages; of that total, more than \$927.5 billion were due to the destructive effects of tropical storms [1]. %JBCOMMENT: Need citation
+Hurricanes have traditionally been predicted using a traditional forecast called the Dvorak technique [2], a subjective process in which multiple meteorologists assess the same data and arrive at distinct intensity and track predictions. %JBCOMMENT: Need citation
+These predictions are based on three main components: dynamics of the current hurricane season, statistical evidence, and an ensemble approach that covers everything. %JBCOMMENT: Unclear what "everything" entails. Is this a combination of seasonal and statistical evidence, or other things as well?
+There are drawbacks with each method. The dynamics of the current season do not help early season hurricanes, statistical evidence can be far reaching and might not account for changing features such as climate change, which has increased sea-surface temperatures. The ensemble approach combines the drawbacks of each and amplifies their respective errors. These errors are then accounted for in the ``cone of probability,'' which makes hurricane predictions improbable. %JBCOMMENT: Not clear what's meant my "improbable." Does this mean to indicate that forecast error margins are too high to be of practical utility?
 
-\section{Artificial Intelligence Background}
-There are two main classes of algorithms that are typical to a narrow set of Artificial Intelligence (AI) called deep learning that we use with large amounts of data. These are typically regression and classification. Classification is when you have labeled data, text, audio, or imagery and you want to classify a variable in that dataset. A car in an image, a specific phrase in a sentence, or a note in an audio file. For the purposes of this design exam, we will be talking about a type of regression algorithm. Forecasting models, in finance, real estate, or weather generally use regression models as they have a continuously variable dataset such as time-distributed data. A multivariate regression model is chosen for tropical weather forecasting as there are multiple variables for the model to predict, such as hurricane path (longitude, and latitude) and intensity (storm pressure). 
+The earliest models are statistical based and the best to date is known as CLIPER5, Climatology and Persistence (CLP5), which uses a multivariate linear regression method [3]. %JBCOMMENT: Are CLIPER5 and CLP5 the same thing? Might be worth deduplicating if the same or clarifying the relationship between them if they're different.
+CLIPER5 is commonly identified as an early model as most scientists believe that using statistical model only is not accurate enough to make predictions, this is where a deep learning architecture could help inference and make better predictions to reduce loss and help agencies get limited resources where they will be needed. %JBCOMMENT: Suggest breaking this into two sentences.
+Traditional forecast models have a hard time predicting what meteorologists describe as ``intensification,'' which is the increase in sustained wind speeds of 35 miles per hour (mph) over a 24-hour period. This research will lay the groundwork to introduce other variables from satellite measurements, which could increase the accuracy of such models by 200% [4]. %JBCOMMENT: Need citation
 
-There are various types of modeling that can be chosen: Dynamic Bayesian Fields, Hidden Markov Models, Recurrent Neural Networks, and Bi-Directional Long-Short Term Memory Networks (Bi-LSTM). Each of them has its pros and cons; however, for the purposes of this exam, we will be looking at a Bi-LSTM network. The pros are that this type of network and architecture is considered state of the art as it is able to keep gated information as has the ability to look in both directions of the time series data (history, and future predictions). This algorithm type is typical for models that are used in voice recognition and text reading. The biggest drawback for this is it requires massive amounts of training data, which could not be available for some instances, and as a result, it requires a large computational load. Thankfully, the National Oceanic and Atmospheric Administration (NOAA) has records dating back to 1851 for hurricanes. As the numbers of hurricanes grows per year, so does the training dataset which allows for a continuous improvement of the model. Recent research in computational methods include de-featuring imagery into respect RGB pixels and forecast at a 24-hour time lag [5]. 
+\section{Machine Learning Background}
+Machine Learning (ML) is a subset of artificial intelligence (AI) that entails extracting, or ``learning,'' patterns from data. One of the most common forms of ML is supervised learning, which iteratively constructs a mathematical model to describe the relationship between sample data inputs and their correct or desired outputs. Supervised learning consists of classification algorithms, which bin input data into one or more categories within a constrained set of known ``classes'' (e.g., identifying cars in imagery or determining user sentinment in a review), and regression algorithms, which estimate a numeric output within a continuous range. Forecasting models in finance, real estate, and weather typically use regression models as they have a continuously variable dataset such as time-distributed data. In this research, a multivariate regression model is chosen for tropical weather forecasting because there are multiple variables for the model to predict, including hurricane path (longitude, and latitude) and intensity (storm pressure). 
 
-\section{Definitions & Acronyms}
+There are many ML models that can be utilized for the task of hurricane forecasting, including Dynamic Bayesian Networks (DBNs), Hidden Markov Models (HMMs), Recurrent Neural Networks (RNNs), Long Short-Term Memory (LSTM) networks and Bi-Directional Long-Short Term Memory (Bi-LSTM) networks. Each of them have pros and cons; however, for the purposes of this research, we will assess the utility of Bi-LSTM networks. %JBCOMMENT: I would suggest adding a brief description of each of the aforementioned approaches and describe why they are inferior to Bi-LSTMs for this problem.
+
+The pros are that this type of network and architecture is considered state of the art as it is able to keep gated information as has the ability to look in both directions of the time series data (history, and future predictions). %JBCOMMENT: Suggest adding a little more detail on *why* being able to look in both directions is beneficial.
+This algorithm type is typical for models that are used in voice recognition and text reading. The primary drawback of Bi-LSTMs is their requirement for significant volumes of training data, which could not be available for some instances, and as a result, it requires a large computational load. %JBCOMMENT: While compute is a concern for processing large datasets, I think the availability of curated, high-quality datasets is the bigger concern, and meshes better with the following sentence about how we're leveraging a pre-curated dataset from NOAA.
+For this study, we utilize a curated hurricane dataset provided by the National Oceanic and Atmospheric Administration (NOAA), which provide hurricane records dating back to 1851 for hurricanes. %JBCOMMENT: Recommend replacing "records" with the type of data (e.g., track data and whatever category of data would summarize wind speed, barometric pressure measurements, etc.)
+As the numbers of hurricanes grows per year, so does the training dataset which allows for a continuous improvement of the model. Recent research in computational methods include de-featuring imagery into respect RGB pixels and forecast at a 24-hour time lag [5]. %JBCOMMENT: Unclear what the connection is betweent the last sentence regarding imagery and the present research (maybe this is future work). Suggest removal from this section.
+
+\section{Definitions and Acronyms}
+%JBCOMMENT: I'm not accustomed to seeing definitions and acronyms within the main body of a conference paper; maybe in an appendix, but typically things are defined and discussed inline fluid with the narrative. I'm guessing this is a carry-over from the design exam, so suggest removal unless this is required per the AMS template.
 DataFrame: A 2-dimensional data structure that’s used with the Pandas library.
 Inference: A prediction made using the deep learning algorithm.
 NumPy: A mathematical function library for large arrays and matrices for python.
@@ -136,31 +132,35 @@ GUI: Graphical User Interface
 MSE: Mean Squared Error equation: The average of the square of the differences.
 
 \section{Applicable Documents}
-NumPy: https://numpy.org/doc/
-Pandas: https://pandas.pydata.org/docs/user_guide/index.html#user-guide
-TensorFlow: https://www.tensorflow.org/api_docs
-Scikit Learn: https://scikit-learn.org/stable/
-NHC Hurricane Database (HURDAT2): http://www.nhc.noaa.gov/data/#hurdat
-NHC Forecast Error Database: http://www.nhc.noaa.gov/verification/verify7.shtml
-NHC GIS: http://www.nhc.noaa.gov/gis/
+%JBCOMMENT: Not sure this section is necessary; this information would typically be captured as citations in the references section. Low-level implementation details, like specific software dependencies (e.g., NumPy Pandas, TensorFlow, etc.) would normally be ommitted and documented only on the project GitHub repository.
+NumPy: \url{https://numpy.org/doc/}
+Pandas: \url{https://pandas.pydata.org/docs/user_guide/index.html#user-guide}
+TensorFlow: \url{https://www.tensorflow.org/api_docs}
+Scikit Learn: \url{https://scikit-learn.org/stable/}
+NHC Hurricane Database (HURDAT2): \url{http://www.nhc.noaa.gov/data/#hurdat}
+NHC Forecast Error Database: \url{http://www.nhc.noaa.gov/verification/verify7.shtml}
+NHC GIS: \url{http://www.nhc.noaa.gov/gis/}
 
 \section{Assumptions and Dependencies}
-# TODO
+%JBCOMMENT: Not sure what this section is necessary or what it is intended to include.
+\# TODO
 \section{Virtual Environment Dependencies}
-# TODO
+%JBCOMMENT: Not sure what this section is necessary or what it is intended to include.
+\# TODO
+
 \section{Assumptions}
+%JBCOMMENT: Most of these things are actually related to experiment setup, suggest renaming this section and crafting the narrative around the data processing steps that were executed to support the ensuing experiments. Docker references and run commands could be removed and saved for the GitHub README.
 Model run command requires at least 2 input arguments –load or not, and singular (univariate) and universal (multivariate0. Other input options are options and have default values in the command functions.
 usage: run.py [-h] [--singular] [--universal] [--load] [--epochs EPOCHS] [--dropout DROPOUT] [--loss LOSS] [--optimizer OPTIMIZER]
 Assumes Docker is installed on the virtual environment to containerize the code and the above dependent software packages to potentially deploy on other environments and computers.
-Assumes that there is a 20% split between the training/test data which is the norm.
-Training is 80% and the test validation data is equivalent to 20%.
+Assumes that there is a 20\% split between the training/test data which is the norm.
+Training is 80\% and the test validation data is equivalent to 20\%.
 Assumes the random state variable inside the train test function split is set to “123”. 
 Each random state assigns a unique identifier to ensure the same test/train data split is the same across different model runs. If this is not “123”, models cannot be compared side by side as the potential validation data could be different. 
 Assumes that the incoming storm data, the validation data, and potential test and live data will be Atlantic storms. These are denoted by “AL” before the date and time as the UID’s.
-Assumes we use the wind radii and category structure from previous research by Dr. Knaff [7].
+Assumes we use the wind radii and category structure from previous research by Dr. Knaff [7]. %JBCOMMENT: Need citation
 The architecture assumes to have at a minimum 5 timesteps and a total of 30 hours to avoid what is commonly called a cold-start issue for Bi-LSTM’s as they require large amounts of input data. Without this, the code will not complete.
-This code assumes for the incoming data will be in the same csv file format as the NHC and NOAA HURDAT2 database [8].
-
+This code assumes for the incoming data will be in the same csv file format as the NHC and NOAA HURDAT2 database [8]. %JBCOMMENT: Need citation
 
 Figure 1: HURDAT2 information in CSV
 This design assumes a virtual environment to have at least 500 GB of internal memory to run the multiple models and do a hyperparameter sweep.
@@ -171,7 +171,7 @@ Assumes placeholder values in hurricane data container of “0” instead of the
 The below requirements are stated to be able to re-produce results that will be presented in this paper and in turn the verification and validation section.
 
 The environment shall split the functions of the system into at least 4 distinct sub-systems
-Data Ingest & Curation
+Data Ingest and Curation
 Data Ingest and Curation should be able to take any file with the same csv format as HURDAT 2
 Creating AI model
 AI Models must be saved as a “. pb" model file extension and not the “. hdf5" extension
@@ -195,6 +195,7 @@ The difference of the results between the Multivariate and Univariate models MUS
  A plot of the ground truth, multivariate prediction, and univariate predictions must be plotted for test.
 
 \section{Design Description}
+%JBCOMMENT: Most of the discussion regarding system design and ML algorithm would be packaged with the approach/solution description. It would probably also focus less on implementation details (e.g., cloud-hosted virtual machines, Docker, JupyterLab, etc.) and more on the algorithm implementation and the general design for data processing to support ML training.
 The overall design of the architecture can be seen below. The development environment for software and collaboration utilizes containerized and reproducible research environments. These containers were deployed on a virtual machine hosted on the cloud such that collaborators can work simultaneously on the same machine. By integrating JupyterLab, a machine learning workspace tool with Docker, a runtime container, the research can benefit from both a cross-platform web application and reproducibility. There are four main elements to the HURAIM Architecture: Data Preparation, AI Model generation, Making Predictions, Saving and Viewing Predictions. In part one, we are able to ingest the database of hurricanes from 1971-2016. The HURDAT2 data was more accurate due to the availability of various input sources such as satellites, oceanic sensors, and aircraft sensors. These multiple sources of data reduced the variance in the readings and the best track data from each sensor was recorded. The Data curation and ingest functions are used again, once when we compare the prediction observations against the OFCL errors data file, and again when we use the code to ingest and curate the live or test data files for the Output View and Save functions. Next, we develop the algorithm and generate the model, the feature scaler, the hurricane ID’s file, a “. json” configuration file, and training and testing validation plots with tensorboard. The paper will describe in greater detail in each respective segment the process that the development environment goes through.
 
 
@@ -205,7 +206,7 @@ Figure 3: Overall Data Architecture Ingest, Curation, Training, and Model Genera
 In the below sections, we will see how the overall architecture will allow for us to compare ground truth observations (recorded hurricane tracks and their errors), with the predictions of the multivariate and univariate models. As the code does not allow for a batch run, two individual runs will be required to create the model file weights and biases files. With the weights and biases file, we can use the scaler that’s generated with the models to inverse these predicted values to get real world values in terms of wind, lat, and long. These values are then outputted to a “.kml” extension file where we can use a web application to view the predictions on a map. There exists a low resolution “test.png” file that also outputs for quick checks inside the virtual environment. This was key to testing code and will be talked about in greater detail in the test and evaluation section farther in the paper. The design of the AI algorithm for the Bi-Directional LSTM can be seen below in detail.
 
 
-Figure 4: Deep RNN for Hurricane Predictions for Univariate Predictions [9]
+Figure 4: Deep RNN for Hurricane Predictions for Univariate Predictions [9] %JBCOMMENT: Is this a citation for a figure published in another paper? If so, you would likely need permission from the authors if they hold the copyright. If the publisher holds the copyright, you may not need to. If it's just a vanilla RNN, it may be easier to recreate the figure or use one with a creative commons license.
 
 The RNN above was changed to fit the design for better evaluation purposes. The inputs were changed from 24-hour timesteps to 6 hours. The outputs also went from being able to predict after 120 hours to being able to run inference after 30 hours. The algorithm requires at least 5 timesteps. 
 
@@ -213,7 +214,7 @@ System Design and Setup
 Data Curation and Ingest
 
 
-Figure 5: Data Ingestion & Curation Flow Diagram
+Figure 5: Data Ingestion and Curation Flow Diagram
 The data curation and ingest functions are used throughout the HURAIM architecture. They are used for ingesting the hurdat2 data, the error data file, and again with the test file. he NHC HURDAT2 database contains the tracking information for Atlantic tropical and subtropical cyclones which includes hurricanes and tropical storms from 1851 to 2016. The most updated version of the dataset is included on the noaa.gov site and includes 2 additional years of cyclone data compared to the data set available on Kaggle and is potentially more descriptive. To match the inputs of the baseline model used by the NHC, we are calculating the forward motion of the storm by applying a vector based on previous and current geographical location.  [9]
 
 The Forecast Error Database contains information on the accuracy of predicted models from the NHC. The two model forecast errors available are labeled OFCL and BCD5. The OFCL is the official NHC forecast and the BCD5 is the real track available. This data set can be used to benchmark and evaluate the deep learning model. The NOAA and NHC also hosts a geographical information system (GIS) that contains raw and processed data on hurricanes. The server hosting the GIS is publicly accessible and can be used to evaluate our model by comparing the 2017 Atlantic tropical season. The preliminary best tracks can be found here before they are finalized and available in the HURDAT2 data set. With the GIS, we can construct a final evaluation data set. [9] The evaluation dataset we used were hurricane data available from 2017 and 2018 hurricane seasons. 
@@ -242,76 +243,74 @@ Figure 8: Run Command for Model Generation
 Inference Returns from Individual Models
 
 Figure 9: Generate Real Wind, Lat, Long Outputs
-The inference subsystem design can be seen above. There are 2 main inputs to this subsystem. The first is the model, scaler, and hyperparameters files. The second is whether the input is a live or a test file. If a test file specified, then a second input of the location (in the venv) and the name of the test file to create predictions for. The code in the figure below shows how we inverse the scaler that was generated with the model to get real world values from weights during the “Inverse Scaler to get real data” section in the diagram seen above.
+The inference subsystem design can be seen above. There are 2 main inputs to this subsystem. The first is the model, scaler, and hyperparameters files. The second is whether the input is a live or a test file. If a test file specified, then a second input of the location (in the venv) and the name of the test file to create predictions for. The code in the figure below shows how we inverse the scaler that was generated with the model to get real world values from weights during the ``Inverse Scaler to get real data'' section in the diagram seen above.
 
 
 Figure 10: Sample Inference Calculation for Wind from deploy.py
 The original features are taken, and a subset feature list is created for predictions. While we used 11 features to generate the model, for the purposes of this paper, we have only evaluated the 3 output variables for wind, latitude, and longitude for the timesteps in 6-hour intervals for individual storms seen in the figure below.
 
 
-Figure 11: Subset of features for inference from hurricane_container.py
-Once the 3 features are generated, they are returned as “results” and those results are called in the next subsystem called “Output View and Save.”
+%Figure 11: Subset of features for inference from hurricane_container.py
+Once the 3 features are generated, they are returned as ``results'' and those results are called in the next subsystem called “Output View and Save.”
 Output View and Save 
 
 Figure 12: Graph Generation for Latitude and Longitude
 The Output view and save files are really a subsystem of the output generation system. The command input that runs the inference also saves the predictions in a csv file and a kml file. The kml file is then used to plot the results in a 3rd party viewer. 
 
 
-Figure 13: Code example for CSV and KML file for output V&V
+Figure 13: Code example for CSV and KML file for output V\&V
 
 \section{Design Alternatives}
+%JBCOMMENT: This analysis of alternatives would typically be packaged with the approach and/or experiment setup to justify the decisions that were made (e.g., the model that was selected and the data processing steps that were applied in support of the experiment).
 Two other designs that were seriously considered are small changes in the AI model algorithm and the timesteps feature. The first was that instead of a Bi-directional LSTM, a single layer LSTM was considered with a dense layer on top. This meant that the algorithm couldn’t look at both the forward and backward of that inference step and could only use one direction for contextual clues. The Bi-directional LSTM worked better from a standard deviance perspective as we have the “OFCL” data, where the O is operational and during the season, and the BCD5, where the “B” stands for “best track” and is only available after the hurricane season. This allows us to compare our prediction error in both directions with the NOAA track guidance at the time, and the ground truth observations against both sets of predictions. The differences in the deployment of the design alternative can be seen below.
 
 Figure 14: LSTM Time Distributed from lstm.py
 In the figure above the model was only run for comparison against the univariate models as can be seen by the “Dense (1)” call in the code. This allows for a generation of an output variable shape of “1” which is for the individual models.
 
 
-Figure 15: Bi-LSTM with Time Distributed from bd_lstm.py
+Figure 15: Bi-LSTM with Time Distributed from bd\_lstm.py
 The change in the code is slight but make a difference in the model architecture. The second portion of this code also allows for the Bi-LSTM to be run on the multivariate model architecture, which is what this paper describes. The variable “Dense (3)” allows for all 3 variables to be output: wind, lat, and long.
 
-The second design alternative was switching the forecast minimum from 5 timesteps of 24 hours to 5 timesteps of 6 hours. This allows for inference after 30 hours after hurricane formation versus 5 days. While the model has less performance, it is impractical to work with the 120-hour time requirement. In real-world applications, hurricanes form, hit, and dissipate within that time frame. To allow for a dynamic of faster predictions, the practical purposes of the 30-hour architecture outweigh the performance benefits of the 120-hour architecture. The figure below shows the changes in the code to allow for a different timestep. 
+The second design alternative was switching the forecast minimum from 5 timesteps of 24 hours to 5 timesteps of 6 hours. This allows for inference after 30 hours after hurricane formation versus 5 days. While the model has less performance, it is impractical to work with the 120-hour time requirement. In real-world applications, hurricanes form, hit, and dissipate within that time frame. To allow for a dynamic of faster predictions, the practical purposes of the 30-hour architecture outweigh the performance benefits of the 120-hour architecture. The figure below shows the changes in the code to allow for a different timestep.
 
-
-Figure 16: Output shape Intervals from Data_Utils.py
+Figure 16: Output shape Intervals from Data\_Utils.py
 As the input and output shapes have to be the same, having a 6-hour input interval also allows us to make updated predictions every 6 hours. It is the same time interval that live hurricanes are recorded at. This allows us to be able to make predictions with every new recorded timestep by NOAA and NHC and not wait 24 hours to make a new prediction. Theoretically, the faster we get input data, the faster the model could make inference predictions for the 3 variables in wind, lat, and long. 
 
 Other designs were not seriously considered as the task of this paper was to consider how a multivariate model compared against existing univariate models. The design alternatives shown above were the ones considered as they were the alternatives for the univariate models.
 Bi-Directional LSTM’s and Mathematical Approach for all Architectures
 
-Bidirectional RNNs were first produced by Schuster and Paliwal in their journal article title Bidirectional Recurrent Neural Networks [10]. From that time there have been numerous architectures developed for time series distributed data. LSTM’s were created after traditional Bi-directional RNN’s were unable to provide the long-term dependencies that RNN’s could do in theory. This theory is known as the gradient descent issue in deep learning and for the purposes of this exam, we will not dive too deep into the mathematics. We will go through the RNN architecture as it was considered as an alternate design, and then go through why we chose a Bi-Directional LSTM as the final design, with a simple explanation for the gradient descent issue.
+Bidirectional RNNs were first produced by Schuster and Paliwal in their journal article title Bidirectional Recurrent Neural Networks [10]. %JBCOMMENT: Need citation
+From that time there have been numerous architectures developed for time series distributed data. LSTM’s were created after traditional Bi-directional RNN’s were unable to provide the long-term dependencies that RNN’s could do in theory. This theory is known as the gradient descent issue in deep learning and for the purposes of this exam, we will not dive too deep into the mathematics. We will go through the RNN architecture as it was considered as an alternate design, and then go through why we chose a Bi-Directional LSTM as the final design, with a simple explanation for the gradient descent issue.
 
 In the diagram below you see that a bi-directional LSTM has 2 hidden layers, one for the forward propagation in the hidden state (solid orange line in), and one of the backwards propagation in the hidden state (dotted orange line). This diagram also shows why, in Figure 16, there is a lag of 6 hours because the first timestep cannot do backwards propagation.
 
 Figure 17: Example of a 3 timestep Bi-directional RNN with one layer
-These bi-directional RNN’s can be architected to use multiple layers and another type of function called Gated RNN’s. Building on Figure 4, the figure below shows a Gated Recurrent Neural Network. This gated RNN’s have a “gate” function which decides if the value being predicted has value to pass on to the next timestep. This preserves long term memory for computational purposes as some values generated by the model do not necessarily add value to the model. A new memory h ̃(t) is the consolidation of a new input word x(t) with the past hidden state h(t−1). Anthropomorphically, this stage is the one who knows the recipe of combining a newly observed value with the past hidden state h(t−1) to summarize this new value in light of the contextual past as the vector h ̃(t). The update signal z(t) is responsible for determining how much of h(t−1) should be carried forward to the next state. For instance, if z(t) ≈ 1, then h(t−1) is almost entirely copied out to h(t−1). Conversely, if z ≈ 0, then mostly the new memory h is forwarded to the next hidden state. The reset signal r(t) is responsible for determining how important h(t−1) is to the summarization h(t). The reset gate has the important ability to completely diminish past hidden state if it finds that h(t−1) is irrelevant to the computation of the new memory. The hidden state h(t) is finally generated using the past hidden input h(t−1) and the new memory generated h ̃(t) with the advice of the update gate. 
+These bi-directional RNNs can be architected to use multiple layers and another type of function called Gated RNNs. Building on Figure 4, the figure below shows a Gated Recurrent Neural Network. This gated RNNs have a ``gate'' function which decides if the value being predicted has value to pass on to the next timestep. This preserves long term memory for computational purposes as some values generated by the model do not necessarily add value to the model. A new memory h(t) is the consolidation of a new input word x(t) with the past hidden state h(t-1). Anthropomorphically, this stage is the one who knows the recipe of combining a newly observed value with the past hidden state h(t-1) to summarize this new value in light of the contextual past as the vector h(t). The update signal z(t) is responsible for determining how much of h(t-1) should be carried forward to the next state. For instance, if z(t)=1, then h(t-1) is almost entirely copied out to h(t-1). Conversely, if z=0, then mostly the new memory h is forwarded to the next hidden state. The reset signal r(t) is responsible for determining how important h(t-1) is to the summarization h(t). The reset gate has the important ability to completely diminish past hidden state if it finds that h(t-1) is irrelevant to the computation of the new memory. The hidden state h(t) is finally generated using the past hidden input h(t-1) and the new memory generated h(t) with the advice of the update gate.
+
 Final Design
 The final design architecture is shown below for inputs, through the Bi-LSTM, the single LSTM, and the time layer to get to the outputs. This shows the development of the architecture from t-1to t+n. The three outputs for the multivariate architecture are Wind, Lat, and Long. A graphical approach from tensorboard can be seen further below in Figure 24.
 
-
 Figure 18: Final Bi-LSTM with Multivariate Outputs
-One of the issues with using RNN’s is that they, in theory can connect information pieces further back in time, but in practice it’s impossible as it requires large amounts of memory which don’t work for practical problems. This is called the vanishing gradient problem, which will be outside the realm of this paper. Thankfully, LSTM’s do not have this same issue as RNN’s. Their existence and purpose are to hold on to and learn long term dependencies. This is especially required for our problem of learning hurricane track and intensity behavior as we have data from 1851 onwards. In a standard RNN, the operation has one neural network layer, in an LSTM, it has 4 as shown in the figure below. All the figures and context for understanding LSTM’s below are from Chris Olah’s GitHub post on “Understanding LSTM’s.”  [11]
+One of the issues with using RNNs is that they, in theory can connect information pieces further back in time, but in practice it’s impossible as it requires large amounts of memory which don’t work for practical problems. This is called the vanishing gradient problem, which will be outside the realm of this paper. Thankfully, LSTMs do not have this same issue as RNNs. Their existence and purpose are to hold on to and learn long term dependencies. This is especially required for our problem of learning hurricane track and intensity behavior as we have data from 1851 onwards. In a standard RNN, the operation has one neural network layer, in an LSTM, it has 4 as shown in the figure below. All the figures and context for understanding LSTMs below are from Chris Olah’s GitHub post on ``Understanding LSTMs.''  [11] %JBCOMMENT: Need citation
 
- 
 Figure 19: LSTM with its 4-interaction layer
 Earlier, we discussed the vanishing gradient problem which occurs in gradient based solutions like regression problems, and backpropagation. In an LSTM architecture, this is solved by the cell state operation shown below. Long term time dependent information travels in the direction of the arrows freely while doing basic arithmetic functions. Although in the figure below, the arrows are flowing in one direction, for our architecture, the information flows both ways, which is why it’s known as a Bi-Directional LSTM.
 
-Figure 20: Cell State of a Unidirectional LSTM & Gate Operation
+Figure 20: Cell State of a Unidirectional LSTM and Gate Operation
 
 As with a RNN, which has a single gate operation, an LSTM has 4 of these gates which lets a normalized amount of information through to the cell state from [0,1], shown as the operation on the right of Figure 20. 
-Step-by-Step mathematical approach for LSTM’s
+Step-by-Step mathematical approach for LSTMs
 
-The first step in our LSTM is to decide what information we’re going to throw away from the cell state. This decision is made by a sigmoid layer called the “forget gate layer.” It looks at ht−1and xt, and outputs a number between 0 and 1 for each number in the cell state C(t−1). A 1 tells the gate to keep all of the information to pass, while a 0 instructs the gate to forget and not pass it forward. 
+The first step in our LSTM is to decide what information we're going to throw away from the cell state. This decision is made by a sigmoid layer called the ``forget gate layer.'' It looks at ht-1and xt, and outputs a number between 0 and 1 for each number in the cell state C(t-1). A 1 tells the gate to keep all of the information to pass, while a 0 instructs the gate to forget and not pass it forward. 
 
 Figure 21: Forget Gate Layer in an LSTM
-The next 2 of the 4 layers decide what new information we’re going to store in the cell state. Broken out into two parts, the first is a sigmoid layer called the “input gate layer” decides which values we’ll update. Next, a tanh layer creates a vector of new candidate values, C̃t, that could be added to the state. 
+The next 2 of the 4 layers decide what new information we're going to store in the cell state. Broken out into two parts, the first is a sigmoid layer called the ``input gate layer'' decides which values we'll update. Next, a tanh layer creates a vector of new candidate values, Ct, that could be added to the state. 
 
 Figure 22: Input gate and New Vector gate in an LSTM
-The 4th layer combines these two previous layers and creates an “update state.” This update state is how the model continuously learns through the multiple networks. For our architecture, the model converged at 2000 epochs, which is to say that it took 2000 training steps for the model to stop learning at any appreciable rate and any additional epochs would simply be computationally expensive without increasing model accuracy. Mathematically, we update the old cell state, Ct−1, into the new cell state Ct. The previous steps already decided what actions need to be taken from training, just need to execute this. We multiply the old state by ft, forgetting the things we decided to forget earlier. Then we add it∗C̃ t. This is the new candidate values, scaled by how much we decided to update each state value.
-
+The 4th layer combines these two previous layers and creates an ``update state.'' This update state is how the model continuously learns through the multiple networks. For our architecture, the model converged at 2000 epochs, which is to say that it took 2000 training steps for the model to stop learning at any appreciable rate and any additional epochs would simply be computationally expensive without increasing model accuracy. Mathematically, we update the old cell state, Ct-1, into the new cell state Ct. The previous steps already decided what actions need to be taken from training, just need to execute this. We multiply the old state by ft, forgetting the things we decided to forget earlier. Then we add it*Ct. This is the new candidate values, scaled by how much we decided to update each state value.
 
 Figure 23: Update Layer in LSTM
-In our architecture, we also force what’s known as a “learning rate,” due to the large amounts of data we have, a lower learning rate ensures the cells are not learning and in essence “forgetting” relevant information to the model. With 2000 epochs, we ensure that with a lower learning rate, we can still have enough training steps to get to convergence. As seen in the Tensorboard images below, you see the “loss” or how accurate the model is with the training and test validation data, the model converges. In our design, the operational graph can be seen below. The operational graph is a bottom-up graph meaning the inputs start at the bottom and the metrics and loss functions which are the outputs for a model are at the top.
-
+In our architecture, we also force what's known as a ``learning rate,'' due to the large amounts of data we have, a lower learning rate ensures the cells are not learning and in essence ``forgetting'' relevant information to the model. With 2000 epochs, we ensure that with a lower learning rate, we can still have enough training steps to get to convergence. As seen in the Tensorboard images below, you see the ``loss'' or how accurate the model is with the training and test validation data, the model converges. In our design, the operational graph can be seen below. The operational graph is a bottom-up graph meaning the inputs start at the bottom and the metrics and loss functions which are the outputs for a model are at the top.
 
 Figure 24: Operational Graph for Multivariate Run
 
@@ -319,35 +318,28 @@ Figure 24: Operational Graph for Multivariate Run
 Loss and Optimizer Optimization
 For this paper, we use a GUI called tensorboard that allows for testing and validation of AI models in a virtual environment. Each test run is updated in a excel file with what the model run was and the hyperparameters. In the figure below, the different loss functions are visible for the model training runs to see how well the functions and hyperparameters optimized.
 
-
 Figure 25: Tensorboard Web GUI Preview
-There are a number of optimizer functions that can be used for regression. Traditional approaches such as RMSProp and Stochastic Gradient Descent (sgd) were tested versus their predecessor, adadelta. Adadelta, due to its diminishing learning rates is not often used after the emergence of ADAM, which is generally accepted optimizer for convergence. In an epoch loss curve difference between sgd and adam. As you can see, the learning rate approach for momentum doesn’t allow for sgd to properly converge and would require longer computational time and resources. In the figure below, the training dataset converged, but during the validation phase, it’s visible the function doesn’t optimize the loss for those events. This is known as a hyperparameter sweep. We optimized the hyperparameters for loss ass “mean squared error” and the optimizer as adam [6].
-
-
+There are a number of optimizer functions that can be used for regression. Traditional approaches such as RMSProp and Stochastic Gradient Descent (sgd) were tested versus their predecessor, adadelta. Adadelta, due to its diminishing learning rates is not often used after the emergence of ADAM, which is generally accepted optimizer for convergence. In an epoch loss curve difference between sgd and adam. As you can see, the learning rate approach for momentum doesn't allow for sgd to properly converge and would require longer computational time and resources. In the figure below, the training dataset converged, but during the validation phase, its visible the function doesn’t optimize the loss for those events. This is known as a hyperparameter sweep. We optimized the hyperparameters for loss as ``mean squared error'' and the optimizer as adam [6].
 
 Figure 26: Stochastic Gradient Descent Tensorboard view of Epoch Loss
-In Figure 27, we can see what the change in the model convergence is with the learning rate of .01 and an optimizer of “adam.” 
+In Figure 27, we can see what the change in the model convergence is with the learning rate of .01 and an optimizer of ``adam.''
 
 Figure 27: Training Loss for All Models
 
-As a part of the test and verification process, Tensorboard’s web GUI outputs scalars for the loss function in 2D for every epoch. This data is smoothed to show the general trend of convergence. During training, the loss function for an epoch may be higher than the previous. When this happens, the sigmoid function decides which part of the cell state in the LSTM increased the loss and gets rid of it. This continuously changing loss is proof of the cell state improving and learning.
+As a part of the test and verification process, Tensorboard's web GUI outputs scalars for the loss function in 2D for every epoch. This data is smoothed to show the general trend of convergence. During training, the loss function for an epoch may be higher than the previous. When this happens, the sigmoid function decides which part of the cell state in the LSTM increased the loss and gets rid of it. This continuously changing loss is proof of the cell state improving and learning.
 
-
-Figure 28: Test vs Train Data run 12_03_04_25
+Figure 28: Test vs Train Data run 12\_03\_04\_25
 Another requirement was to ensure that all four models that were being run converged. As seen by the Loss convergence values, from [1e-3, 3e-3], all 4 models were converged by epoch 2000 which means that at the learning rate specified, default of .01, the model was not learning anymore and minimized error loss through all cell states and layers.
-
 
 Figure 29: Zoomed in Model Loss for all 4 Models
 Terminal Window Output
 One of the requirements of the paper was to be able to do quick validation checks in the output window to ensure the code was generating predictions before running the csv file and plotting python functions.
 The code below shows predictions up to 30 hours with the first 5 inputs from a specific hurricane as a check to ensure the minimum 5 timesteps were in a test file.
 
-
 Figure 30: Terminal Output for Multivariate Model
 Geodesic calculations for Small distances
 
-As the earth is not flat, and this is especially true for hurricanes that start at the equator and travel towards the Gulf of Mexico. The equations below describe the approximations done to calculate the geodesic distance for the differences in the latitude and longitude in the data above. A combination of Haversine functions and Chebyshev’s method take multiple trigonometry calculations to get an accurate distance between two points is necessary between large distances. For distances less than 500 nautical miles, we can approximate using constants for the cosine calculation as seen in Equations below.
-
+As the earth is not flat, and this is especially true for hurricanes that start at the equator and travel towards the Gulf of Mexico. The equations below describe the approximations done to calculate the geodesic distance for the differences in the latitude and longitude in the data above. A combination of Haversine functions and Chebyshev's method take multiple trigonometry calculations to get an accurate distance between two points is necessary between large distances. For distances less than 500 nautical miles, we can approximate using constants for the cosine calculation as seen in Equations below.
 
 Equation 1: True Distance computation for 2 Geographic points
 
@@ -355,20 +347,12 @@ Results in MSE
 
 The below results in the table are a run for Hurricane Barry from 2019 which was not a part of the training or testing validation test set. The figure below, Hurricane Barry was stripped into the first 14 timesteps for inference. In future research, the code will be dynamic enough to do inference at any timestep. 
 
-
 Figure 31:Test Data
-
-
-
-
-
-
-
 
 In the figure below is the picture of the original Barry Dataset that we used for ground predictions.
 
-
 Figure 32: Full Hurricane Barry 2019 CSV Data Capture
+
 These were compared to each other using the mean squared error method, equation below, where the difference of the predictions vs. ground truths were squared, then averaged over the timesteps. MSE will allow us to compare the results between the multivariate and univariate models.
 MSE= 1ni=1n(Yi-Yi)2
 MSE=Mean Squared Error
@@ -380,124 +364,12 @@ In the table below, we see the difference between wind, lat, and long in terms o
 
 Table 1: Results for a Singular Test Case (Hurricane Barry 2019)
 
-
 The figure below shows the tabled results in a map format the univariate tracking for hurricanes is spot on, but the wind intensity is better predicted with the multivariate model. Additional work will be done in the future to do batch runs against multiple test hurricanes. 
 
-
 Figure 33: Final Results for Hurricane Barry
+
 Future Research
 
 Future research will focus on 3 main things, higher fidelity, model rigidity, and temporal specificity. fidelity of the model will be the most important as a high accuracy model that can be deployed quickly is the primary goal. Next, we want to ensure that the model is rigid in a couple of ways. The model can be rigidized by manually curating some data by averaging data of a few test and train cases to allow for some erroneous data inputs which happens. The next goal will be temporal specificity and designing algorithms that are better suited for the current time period. The number of hurricanes and their intensity has greatly increased in the last decade due to increasing mean surface temperature. The training data used was from 197-2016. A more recent and curated dataset from 2000-2018 might yield a better approximation for the types of hurricanes that have been seen and use 2018-2020 hurricanes as a validation set. 
-
-
-\section{Introduction}
-\lipsum[2]
-\lipsum[3]
-
-
-\section{Headings: first level}
-\label{sec:headings}
-
-\lipsum[4] See Section \ref{sec:headings}.
-
-\subsection{Headings: second level}
-\lipsum[5]
-\begin{equation}
-	\xi _{ij}(t)=P(x_{t}=i,x_{t+1}=j|y,v,w;\theta)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
-\end{equation}
-
-\subsubsection{Headings: third level}
-\lipsum[6]
-
-\paragraph{Paragraph}
-\lipsum[7]
-
-
-
-\section{Examples of citations, figures, tables, references}
-\label{sec:others}
-
-\subsection{Citations}
-Citations use \verb+natbib+. The documentation may be found at
-\begin{center}
-	\url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-
-Here is an example usage of the two main commands (\verb+citet+ and \verb+citep+): Some people thought a thing \citep{kour2014real, hadash2018estimate} but other people thought something else \citep{kour2014fast}. Many people have speculated that if we knew exactly why \citet{kour2014fast} thought this\dots
-
-\subsection{Figures}
-\lipsum[10]
-See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of the first footnote.}
-\lipsum[11]
-
-\begin{figure}
-	\centering
-	\fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-	\caption{Sample figure caption.}
-	\label{fig:fig1}
-\end{figure}
-
-\subsection{Tables}
-See awesome Table~\ref{tab:table}.
-
-The documentation for \verb+booktabs+ (`Publication quality tables in LaTeX') is available from:
-\begin{center}
-	\url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-
-
-\begin{table}
-	\caption{Sample table title}
-	\centering
-	\begin{tabular}{lll}
-		\toprule
-		\multicolumn{2}{c}{Part}                   \\
-		\cmidrule(r){1-2}
-		Name     & Description     & Size ($\mu$m) \\
-		\midrule
-		Dendrite & Input terminal  & $\sim$100     \\
-		Axon     & Output terminal & $\sim$10      \\
-		Soma     & Cell body       & up to $10^6$  \\
-		\bottomrule
-	\end{tabular}
-	\label{tab:table}
-\end{table}
-
-\subsection{Lists}
-\begin{itemize}
-	\item Lorem ipsum dolor sit amet
-	\item consectetur adipiscing elit.
-	\item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
-\end{itemize}
-
-
-\bibliographystyle{unsrtnat}
-\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
-
-
-%%% Uncomment this section and comment out the \bibliography{references} line above to use inline references.
-% \begin{thebibliography}{1}
-
-% 	\bibitem{kour2014real}
-% 	George Kour and Raid Saabne.
-% 	\newblock Real-time segmentation of on-line handwritten arabic script.
-% 	\newblock In {\em Frontiers in Handwriting Recognition (ICFHR), 2014 14th
-% 			International Conference on}, pages 417--422. IEEE, 2014.
-
-% 	\bibitem{kour2014fast}
-% 	George Kour and Raid Saabne.
-% 	\newblock Fast classification of handwritten on-line arabic characters.
-% 	\newblock In {\em Soft Computing and Pattern Recognition (SoCPaR), 2014 6th
-% 			International Conference of}, pages 312--318. IEEE, 2014.
-
-% 	\bibitem{hadash2018estimate}
-% 	Guy Hadash, Einat Kermany, Boaz Carmeli, Ofer Lavi, George Kour, and Alon
-% 	Jacovi.
-% 	\newblock Estimate and replace: A novel approach to integrating deep neural
-% 	networks with existing applications.
-% 	\newblock {\em arXiv preprint arXiv:1804.09028}, 2018.
-
-% \end{thebibliography}
-
 
 \end{document}
